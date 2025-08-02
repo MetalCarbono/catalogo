@@ -168,19 +168,21 @@
         const tam = tamEl.dataset.tam;
         const input = tamEl.querySelector('input');
         const qtd = parseInt(input.value);
-        const disp = parseInt(tamEl.dataset.disp);
+        let disp = parseInt(tamEl.dataset.disp);
 
         if (qtd > 0 && qtd <= disp) {
           algumSelecionado = true;
           const existente = listaItens.find(i => i.codigo === codigo && i.cor === corSelecionada && i.tamanho === tam);
           if (existente) {
-            if (existente.qtd + qtd > disp) {
-              alert(`Estoque insuficiente para ${tam}. Disponível: ${disp}`);
+            if (existente.qtd + qtd > estoque[corSelecionada][tam]) {
+              alert(`Estoque insuficiente para ${tam}. Disponível: ${estoque[corSelecionada][tam]}`);
             } else {
               existente.qtd += qtd;
+              estoque[corSelecionada][tam] -= qtd;
             }
           } else {
             listaItens.push({ codigo, nome, cor: corSelecionada, tamanho: tam, qtd });
+            estoque[corSelecionada][tam] -= qtd;
           }
         }
       });
@@ -190,6 +192,8 @@
         return;
       }
 
+      mostrarEstoque();
+      mostrarTamanhos();
       atualizarTabela();
     });
 
@@ -214,7 +218,11 @@
     }
 
     function removerItem(index) {
+      const item = listaItens[index];
+      estoque[item.cor][item.tamanho] += item.qtd;
       listaItens.splice(index, 1);
+      mostrarEstoque();
+      mostrarTamanhos();
       atualizarTabela();
     }
 
@@ -232,3 +240,4 @@
 
 </body>
 </html>
+

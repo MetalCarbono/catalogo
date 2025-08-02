@@ -197,7 +197,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
-    // Produtos com estoque por produto (quantidade total, simplificado)
+    // Produtos com estoque
     const produtos = [
       {
         id: 1,
@@ -224,7 +224,7 @@
     const enviarWhatsappBtn = document.getElementById('enviarWhatsappBtn');
     const graficosDiv = document.getElementById('graficos');
 
-    // Atualizar exibição do estoque na página
+    // Atualizar estoque visível na página
     function atualizarEstoqueNaPagina() {
       produtos.forEach(p => {
         const produtoDiv = [...document.querySelectorAll('.produto')].find(div => div.dataset.codigo === p.codigo);
@@ -235,7 +235,7 @@
     }
     atualizarEstoqueNaPagina();
 
-    // Adicionar evento aos botões "Adicionar à lista"
+    // Botões "Adicionar à lista"
     document.querySelectorAll('.btn-adicionar').forEach(btn => {
       btn.addEventListener('click', () => {
         const produtoDiv = btn.closest('.produto');
@@ -260,10 +260,10 @@
           return;
         }
 
-        // Verifica estoque disponível para essa quantidade + já adicionada na lista
+        // Quantidade já na lista para a mesma combinação
         const qtdNaLista = obterQuantidadeNaLista(codigo, cor, tamanho);
         if (quantidade + qtdNaLista > produto.estoque) {
-          alert(`Quantidade indisponível no estoque. Estoque disponível: ${produto.estoque - qtdNaLista}`);
+          alert(`Quantidade indisponível no estoque. Estoque disponível para esta combinação: ${produto.estoque - qtdNaLista}`);
           return;
         }
 
@@ -274,7 +274,7 @@
       });
     });
 
-    // Função para obter quantidade já adicionada na lista para o mesmo código + cor + tamanho
+    // Quantidade já na lista para dado código, cor, tamanho
     function obterQuantidadeNaLista(codigo, cor, tamanho) {
       let soma = 0;
       for (const tr of tabelaLista.rows) {
@@ -288,19 +288,176 @@
       return soma;
     }
 
-    // Função para adicionar item na tabela
+    // Adicionar item na tabela
     function adicionarItemNaLista(item) {
-      // Verifica se já existe um item com mesmo código, cor e tamanho — se sim, soma quantidade
+      // Verifica se já existe um item com mesmo código, cor e tamanho
       const linhas = Array.from(tabelaLista.querySelectorAll('tr'));
       for (const linha of linhas) {
         const codigoTd = linha.querySelector('.td-codigo').textContent;
         const corSelect = linha.querySelector('.select-cor');
         const tamanhoSelect = linha.querySelector('.select-tamanho');
         if (codigoTd === item.codigo && corSelect.value === item.cor && tamanhoSelect.value === item.tamanho) {
-          // Atualiza quantidade (somando e respeitando estoque)
           let qtdAtual = parseInt(linha.querySelector('.input-quantidade').value);
           let novaQtd = qtdAtual + item.quantidade;
-
           const produto = produtos.find(p => p.codigo === item.codigo);
           if (novaQtd > produto.estoque) {
             alert(`Quantidade máxima no estoque para este item é ${produto.estoque}.`);
+            novaQtd = produto.estoque;
+          }
+          linha.querySelector('.input-quantidade').value = novaQtd;
+          atualizarTotalLinha(linha, item.preco, novaQtd);
+          atualizarGraficos();
+          return;
+        }
+      }
+
+      const tr = document.createElement('tr');
+
+      // Código
+      const tdCodigo = document.createElement('td');
+      tdCodigo.textContent = item.codigo;
+      tdCodigo.classList.add('td-codigo');
+      tr.appendChild(tdCodigo);
+
+      // Nome
+      const tdNome = document.createElement('td');
+      tdNome.textContent = item.nome;
+      tr.appendChild(tdNome);
+
+      // Cor (select)
+      const tdCor = document.createElement('td');
+      const selectCor = document.createElement('select');
+      selectCor.classList.add('select-cor');
+      const opcoesCor = produtos.find(p => p.codigo === item.codigo).cores;
+      for (const corOp of opcoesCor) {
+        const option = document.createElement('option');
+        option.value = corOp;
+        option.textContent = corOp;
+        if (corOp === item.cor) option.selected = true;
+        selectCor.appendChild(option);
+      }
+      tdCor.appendChild(selectCor);
+      tr.appendChild(tdCor);
+
+      // Tamanho (select)
+      const tdTamanho = document.createElement('td');
+      const selectTam = document.createElement('select');
+      selectTam.classList.add('select-tamanho');
+      const opcoesTam = produtos.find(p => p.codigo === item.codigo).tamanhos;
+      for (const tamOp of opcoesTam) {
+        const option = document.createElement('option');
+        option.value = tamOp;
+        option.textContent = tamOp;
+        if (tamOp === item.tamanho) option.selected = true;
+        selectTam.appendChild(option);
+      }
+      tdTamanho.appendChild(selectTam);
+      tr.appendChild(tdTamanho);
+
+      // Quantidade (input)
+      const tdQuantidade = document.createElement('td');
+      const inputQtd = document.createElement('input');
+      inputQtd.type = 'number';
+      inputQtd.min = 1;
+      inputQtd.value = item.quantidade;
+      inputQtd.classList.add('input-quantidade');
+      tdQuantidade.appendChild(inputQtd);
+      tr.appendChild(tdQuantidade);
+
+      // Preço Unitário
+      const tdPreco = document.createElement('td');
+      tdPreco.textContent = `R$ ${item.preco.toFixed(2)}`;
+      tr.appendChild(tdPreco);
+
+      // Total
+      const tdTotal = document.createElement('td');
+      tdTotal.classList.add('td-total');
+      tdTotal.textContent = `R$ ${(item.preco * item.quantidade).toFixed(2)}`;
+      tr.appendChild(tdTotal);
+
+      // Remover
+      const tdRemover = document.createElement('td');
+      const btnRemover = document.createElement('button');
+      btnRemover.textContent = 'X';
+      btnRemover.classList.add('btn-remover');
+      btnRemover.addEventListener('click', () => {
+        tr.remove();
+        if (tabelaLista.rows.length === 0) {
+          listaCompraDiv.style.display = 'none';
+          graficosDiv.style.display = 'none';
+        } else {
+          atualizarGraficos();
+        }
+      });
+      tdRemover.appendChild(btnRemover);
+      tr.appendChild(tdRemover);
+
+      // Atualiza total e valida quantidade
+      function validarEstoqueCombo() {
+        const codigo = item.codigo;
+        const cor = selectCor.value;
+        const tamanho = selectTam.value;
+        let qtd = parseInt(inputQtd.value);
+        const produto = produtos.find(p => p.codigo === codigo);
+
+        // Soma quantidades nas outras linhas com mesma combinação
+        let somaOutrasLinhas = 0;
+        for (const linha of tabelaLista.rows) {
+          if (linha === tr) continue;
+          const c = linha.querySelector('.td-codigo').textContent;
+          const corL = linha.querySelector('.select-cor').value;
+          const tamL = linha.querySelector('.select-tamanho').value;
+          if (c === codigo && corL === cor && tamL === tamanho) {
+            somaOutrasLinhas += parseInt(linha.querySelector('.input-quantidade').value);
+          }
+        }
+
+        const maxDisponivel = produto.estoque - somaOutrasLinhas;
+
+        if (isNaN(qtd) || qtd < 1) {
+          qtd = 1;
+        }
+
+        if (qtd > maxDisponivel) {
+          alert(`Quantidade máxima disponível no estoque para esta combinação: ${maxDisponivel}`);
+          qtd = maxDisponivel;
+        }
+
+        inputQtd.value = qtd;
+        atualizarTotalLinha(tr, item.preco, qtd);
+        atualizarGraficos();
+      }
+
+      inputQtd.addEventListener('input', validarEstoqueCombo);
+      selectCor.addEventListener('change', validarEstoqueCombo);
+      selectTam.addEventListener('change', validarEstoqueCombo);
+
+      tabelaLista.appendChild(tr);
+    }
+
+    // Atualiza total da linha (preço x quantidade)
+    function atualizarTotalLinha(tr, preco, qtd) {
+      const tdTotal = tr.querySelector('.td-total');
+      tdTotal.textContent = `R$ ${(preco * qtd).toFixed(2)}`;
+    }
+
+    // Enviar WhatsApp
+    enviarWhatsappBtn.addEventListener('click', () => {
+      if (tabelaLista.rows.length === 0) {
+        alert('Lista vazia.');
+        return;
+      }
+
+      let linhasTexto = [];
+      for (const tr of tabelaLista.rows) {
+        const codigo = tr.querySelector('.td-codigo').textContent;
+        const nome = tr.children[1].textContent;
+        const cor = tr.querySelector('.select-cor').value;
+        const tamanho = tr.querySelector('.select-tamanho').value;
+        const qtd = tr.querySelector('.input-quantidade').value;
+        const total = tr.querySelector('.td-total').textContent;
+
+        linhasTexto.push(`Código: ${codigo} | Produto: ${nome} | Cor: ${cor} | Tamanho: ${tamanho} | Quantidade: ${qtd} | Total: ${total}`);
+      }
+      const texto = encodeURIComponent(linhasTexto.join('\n'));
+      const telefone = ''; // Coloque o telefone no formato internacional aqui (ex: 5511999999999)

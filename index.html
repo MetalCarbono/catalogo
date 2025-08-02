@@ -1,131 +1,323 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Catálogo de Roupas</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Catálogo Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    h1 { text-align: center; color: #333; }
-    .produto { border: 1px solid #ccc; border-radius: 10px; padding: 15px; margin-bottom: 20px; background: #fff; }
-    .produto img { max-width: 100%; height: auto; border-radius: 5px; }
-    .produto select, .produto input[type=number] { padding: 5px; margin-top: 5px; }
-    .lista { background: #fff; padding: 15px; border-radius: 10px; margin-top: 30px; }
-    button { padding: 10px 15px; margin-top: 10px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
-    button:hover { background-color: #218838; }
-    .pedido { margin-top: 15px; white-space: pre-line; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .produto {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    .produto h2 {
+      margin-top: 0;
+    }
+    label {
+      display: inline-block;
+      margin: 0 10px 10px 0;
+      cursor: pointer;
+    }
+    select, input[type="number"] {
+      padding: 5px;
+      margin-left: 5px;
+      width: 60px;
+    }
+    button {
+      cursor: pointer;
+      padding: 10px 15px;
+      background: #007bff;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      margin-top: 10px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #listaCompra {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    #listaCompra textarea {
+      width: 100%;
+      height: 150px;
+      font-family: monospace;
+      font-size: 14px;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+    #graficos {
+      max-width: 700px;
+      margin: 40px auto;
+      display: flex;
+      justify-content: space-around;
+      gap: 30px;
+    }
+    canvas {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
 
-<h1>Catálogo de Roupas</h1>
+  <h1>Catálogo Online</h1>
 
-<div class="produto">
-  <h3>Camiseta Estilosa</h3>
-  <img src="https://via.placeholder.com/300x200?text=Camiseta+Estilosa" alt="Camiseta Estilosa">
-  <p>Cor:
-    <select id="cor1">
-      <option>Preta</option>
-      <option>Branca</option>
-      <option>Azul</option>
-    </select>
-  </p>
-  <p>Tamanho:
-    <select id="tamanho1">
-      <option>P</option>
-      <option>M</option>
-      <option>G</option>
-      <option>GG</option>
-    </select>
-  </p>
-  <p>Quantidade:
-    <input type="number" id="qtd1" min="1" value="1">
-  </p>
-  <button onclick="adicionar(1, 'Camiseta Estilosa')">Adicionar à Lista</button>
-</div>
+  <div id="catalogo">
 
-<div class="produto">
-  <h3>Calça Jeans Skinny</h3>
-  <img src="https://via.placeholder.com/300x200?text=Calça+Jeans" alt="Calça Jeans">
-  <p>Cor:
-    <select id="cor2">
-      <option>Azul Claro</option>
-      <option>Azul Escuro</option>
-      <option>Preta</option>
-    </select>
-  </p>
-  <p>Tamanho:
-    <select id="tamanho2">
-      <option>38</option>
-      <option>40</option>
-      <option>42</option>
-      <option>44</option>
-    </select>
-  </p>
-  <p>Quantidade:
-    <input type="number" id="qtd2" min="1" value="1">
-  </p>
-  <button onclick="adicionar(2, 'Calça Jeans Skinny')">Adicionar à Lista</button>
-</div>
+    <!-- Produto 1 -->
+    <div class="produto" data-produto-id="1" data-nome="Camiseta Básica">
+      <h2>Camiseta Básica</h2>
+      <p>Preço unitário: R$ 50,00</p>
+      <label>
+        Cor:
+        <select class="cor">
+          <option value="">Selecione</option>
+          <option value="Preto">Preto</option>
+          <option value="Branco">Branco</option>
+          <option value="Azul">Azul</option>
+        </select>
+      </label>
+      <label>
+        Tamanho:
+        <select class="tamanho">
+          <option value="">Selecione</option>
+          <option value="P">P</option>
+          <option value="M">M</option>
+          <option value="G">G</option>
+          <option value="GG">GG</option>
+        </select>
+      </label>
+      <label>
+        Quantidade:
+        <input type="number" class="quantidade" min="0" value="0" />
+      </label>
+    </div>
 
-<div class="produto">
-  <h3>Vestido Floral</h3>
-  <img src="https://via.placeholder.com/300x200?text=Vestido+Floral" alt="Vestido Floral">
-  <p>Cor:
-    <select id="cor3">
-      <option>Rosa</option>
-      <option>Verde</option>
-      <option>Preto</option>
-    </select>
-  </p>
-  <p>Tamanho:
-    <select id="tamanho3">
-      <option>P</option>
-      <option>M</option>
-      <option>G</option>
-    </select>
-  </p>
-  <p>Quantidade:
-    <input type="number" id="qtd3" min="1" value="1">
-  </p>
-  <button onclick="adicionar(3, 'Vestido Floral')">Adicionar à Lista</button>
-</div>
+    <!-- Produto 2 -->
+    <div class="produto" data-produto-id="2" data-nome="Calça Jeans">
+      <h2>Calça Jeans</h2>
+      <p>Preço unitário: R$ 120,00</p>
+      <label>
+        Cor:
+        <select class="cor">
+          <option value="">Selecione</option>
+          <option value="Azul Claro">Azul Claro</option>
+          <option value="Azul Escuro">Azul Escuro</option>
+          <option value="Preto">Preto</option>
+        </select>
+      </label>
+      <label>
+        Tamanho:
+        <select class="tamanho">
+          <option value="">Selecione</option>
+          <option value="36">36</option>
+          <option value="38">38</option>
+          <option value="40">40</option>
+          <option value="42">42</option>
+        </select>
+      </label>
+      <label>
+        Quantidade:
+        <input type="number" class="quantidade" min="0" value="0" />
+      </label>
+    </div>
 
-<div class="lista">
-  <h2>📋 Sua Lista de Compras:</h2>
-  <div class="pedido" id="pedido"></div>
-  <button onclick="enviarWhatsapp()">Enviar pelo WhatsApp</button>
-</div>
+  </div>
 
-<script>
-  let lista = [];
+  <button id="gerarListaBtn">Gerar Lista de Compra</button>
 
-  function adicionar(id, nome) {
-    const cor = document.getElementById(`cor${id}`).value;
-    const tamanho = document.getElementById(`tamanho${id}`).value;
-    const qtd = document.getElementById(`qtd${id}`).value;
+  <div id="listaCompra" style="display:none;">
+    <h3>Lista de Compra (edite antes de enviar)</h3>
+    <textarea id="listaTextarea"></textarea>
+    <br/>
+    <button id="enviarWhatsappBtn">Enviar por WhatsApp</button>
+  </div>
 
-    const item = `- ${nome} | Cor: ${cor} | Tamanho: ${tamanho} | Quant: ${qtd}`;
-    lista.push(item);
-    atualizarLista();
-  }
+  <div id="graficos">
+    <canvas id="graficoCores" width="300" height="300"></canvas>
+    <canvas id="graficoTamanhos" width="300" height="300"></canvas>
+  </div>
 
-  function atualizarLista() {
-    document.getElementById('pedido').innerText = lista.join('\n');
-  }
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  function enviarWhatsapp() {
-    if (lista.length === 0) {
-      alert("Adicione pelo menos 1 item à lista.");
-      return;
+  <script>
+    const produtos = [
+      {
+        id: 1,
+        nome: 'Camiseta Básica',
+        preco: 50.00,
+        opcoesCor: ['Preto', 'Branco', 'Azul'],
+        opcoesTamanho: ['P', 'M', 'G', 'GG'],
+      },
+      {
+        id: 2,
+        nome: 'Calça Jeans',
+        preco: 120.00,
+        opcoesCor: ['Azul Claro', 'Azul Escuro', 'Preto'],
+        opcoesTamanho: ['36', '38', '40', '42'],
+      }
+    ];
+
+    const gerarListaBtn = document.getElementById('gerarListaBtn');
+    const listaCompraDiv = document.getElementById('listaCompra');
+    const listaTextarea = document.getElementById('listaTextarea');
+    const enviarWhatsappBtn = document.getElementById('enviarWhatsappBtn');
+
+    gerarListaBtn.addEventListener('click', () => {
+      const linhas = [];
+      const corCount = {};
+      const tamanhoCount = {};
+
+      const produtosDivs = document.querySelectorAll('.produto');
+      produtosDivs.forEach(div => {
+        const nome = div.dataset.nome;
+        const preco = produtos.find(p => p.nome === nome).preco;
+        const cor = div.querySelector('.cor').value;
+        const tamanho = div.querySelector('.tamanho').value;
+        const quantidade = parseInt(div.querySelector('.quantidade').value) || 0;
+
+        if (quantidade > 0) {
+          // Validação mínima: cor e tamanho selecionados
+          if (!cor || !tamanho) {
+            alert(`Para o produto "${nome}" selecione cor e tamanho!`);
+            return;
+          }
+
+          linhas.push(`- ${nome} - Cor: ${cor}, Tamanho: ${tamanho}, Quantidade: ${quantidade}, Total: R$ ${(quantidade * preco).toFixed(2)}`);
+
+          // Contabilizar para gráfico
+          corCount[cor] = (corCount[cor] || 0) + quantidade;
+          tamanhoCount[tamanho] = (tamanhoCount[tamanho] || 0) + quantidade;
+        }
+      });
+
+      if (linhas.length === 0) {
+        alert('Nenhum produto selecionado.');
+        return;
+      }
+
+      // Mostrar lista para edição
+      listaTextarea.value = linhas.join('\n');
+      listaCompraDiv.style.display = 'block';
+
+      // Atualizar gráficos
+      atualizarGraficos(corCount, tamanhoCount);
+    });
+
+    enviarWhatsappBtn.addEventListener('click', () => {
+      const texto = encodeURIComponent(listaTextarea.value);
+      const telefone = ''; // Pode colocar o número da sua loja (ex: 5511999999999) para pré-definir o destinatário
+      const urlWhatsapp = `https://wa.me/${telefone}?text=${texto}`;
+      window.open(urlWhatsapp, '_blank');
+    });
+
+    let chartCores, chartTamanhos;
+
+    function atualizarGraficos(corCount, tamanhoCount) {
+      // Dados cores
+      const cores = Object.keys(corCount);
+      const qtdeCores = Object.values(corCount);
+
+      // Dados tamanhos
+      const tamanhos = Object.keys(tamanhoCount);
+      const qtdeTamanhos = Object.values(tamanhoCount);
+
+      // Se já existir gráficos, destruir para criar novos
+      if (chartCores) chartCores.destroy();
+      if (chartTamanhos) chartTamanhos.destroy();
+
+      const ctxCores = document.getElementById('graficoCores').getContext('2d');
+      chartCores = new Chart(ctxCores, {
+        type: 'pie',
+        data: {
+          labels: cores,
+          datasets: [{
+            label: 'Quantidade por Cor',
+            data: qtdeCores,
+            backgroundColor: cores.map(cor => gerarCorAleatoria()),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            title: {
+              display: true,
+              text: 'Quantidade por Cor'
+            }
+          }
+        }
+      });
+
+      const ctxTamanhos = document.getElementById('graficoTamanhos').getContext('2d');
+      chartTamanhos = new Chart(ctxTamanhos, {
+        type: 'bar',
+        data: {
+          labels: tamanhos,
+          datasets: [{
+            label: 'Quantidade por Tamanho',
+            data: qtdeTamanhos,
+            backgroundColor: tamanhos.map(() => 'rgba(54, 162, 235, 0.7)'),
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              stepSize: 1
+            }
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            title: {
+              display: true,
+              text: 'Quantidade por Tamanho'
+            }
+          }
+        }
+      });
     }
 
-    const mensagem = encodeURIComponent("Olá! Gostaria de comprar:\n" + lista.join('\n'));
-    const telefone = "5511973327880"; // substitua pelo seu número com DDD e país (ex: 5511999999999)
-    const url = `https://wa.me/${telefone}?text=${mensagem}`;
-    window.open(url, '_blank');
-  }
-</script>
-
+    // Função para gerar cor aleatória em rgba para gráficos
+    function gerarCorAleatoria() {
+      const r = Math.floor(Math.random() * 180) + 50;
+      const g = Math.floor(Math.random() * 180) + 50;
+      const b = Math.floor(Math.random() * 180) + 50;
+      return `rgba(${r},${g},${b},0.7)`;
+    }
+  </script>
 </body>
 </html>

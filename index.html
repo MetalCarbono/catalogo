@@ -1,463 +1,374 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Catálogo com Controle de Estoque</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f5f5f5;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .produto {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-    .produto h2 {
-      margin-top: 0;
-    }
-    label {
-      display: inline-block;
-      margin: 0 10px 10px 0;
-      cursor: pointer;
-    }
-    select, input[type="number"] {
-      padding: 5px;
-      margin-left: 5px;
-      width: 60px;
-    }
-    button {
-      cursor: pointer;
-      padding: 10px 15px;
-      background: #007bff;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      margin-top: 10px;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    #listaCompra {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      max-width: 800px;
-      margin: 20px auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-    .btn-remover {
-      background: #dc3545;
-      border: none;
-      padding: 5px 10px;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .btn-remover:hover {
-      background: #a71d2a;
-    }
-    #graficos {
-      max-width: 700px;
-      margin: 40px auto;
-      display: flex;
-      justify-content: space-around;
-      gap: 30px;
-    }
-    canvas {
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Catálogo com Estoque e Lista</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background:#f0f0f0; }
+  h1 { text-align:center; }
+  .produto { background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; }
+  label { margin-right:10px; }
+  select, input[type="number"] { margin-left:5px; width:70px; }
+  button { cursor:pointer; padding:8px 15px; background:#007bff; border:none; color:#fff; border-radius:4px; }
+  button:hover { background:#0056b3; }
+  #listaCompra { background:#fff; max-width:800px; margin:20px auto; padding:15px; border-radius:8px; display:none; }
+  table { width:100%; border-collapse: collapse; margin-top:10px; }
+  th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+  th { background:#007bff; color:#fff; }
+  .btn-remover { background:#dc3545; border:none; color:#fff; padding:5px 10px; border-radius:4px; cursor:pointer; }
+  .btn-remover:hover { background:#a71d2a; }
+  select, input { width: 100%; box-sizing: border-box; }
+</style>
 </head>
 <body>
 
-  <h1>Catálogo Online</h1>
+<h1>Catálogo Online</h1>
 
-  <div id="catalogo">
+<div id="catalogo">
 
-    <!-- Produto 1 -->
-    <div class="produto" data-produto-id="1" data-codigo="CAM001" data-nome="Camiseta Básica">
-      <h2>Código: CAM001 - Camiseta Básica</h2>
-      <p>Preço unitário: R$ 50,00</p>
-      <p>Estoque disponível: <span class="estoque">10</span></p>
-      <label>
-        Cor:
-        <select class="cor">
-          <option value="">Selecione</option>
-          <option value="Preto">Preto</option>
-          <option value="Branco">Branco</option>
-          <option value="Azul">Azul</option>
-        </select>
-      </label>
-      <label>
-        Tamanho:
-        <select class="tamanho">
-          <option value="">Selecione</option>
-          <option value="P">P</option>
-          <option value="M">M</option>
-          <option value="G">G</option>
-          <option value="GG">GG</option>
-        </select>
-      </label>
-      <label>
-        Quantidade:
-        <input type="number" class="quantidade" min="1" value="1" />
-      </label>
-      <button class="btn-adicionar">Adicionar à lista</button>
-    </div>
-
-    <!-- Produto 2 -->
-    <div class="produto" data-produto-id="2" data-codigo="CAL002" data-nome="Calça Jeans">
-      <h2>Código: CAL002 - Calça Jeans</h2>
-      <p>Preço unitário: R$ 120,00</p>
-      <p>Estoque disponível: <span class="estoque">5</span></p>
-      <label>
-        Cor:
-        <select class="cor">
-          <option value="">Selecione</option>
-          <option value="Azul Claro">Azul Claro</option>
-          <option value="Azul Escuro">Azul Escuro</option>
-          <option value="Preto">Preto</option>
-        </select>
-      </label>
-      <label>
-        Tamanho:
-        <select class="tamanho">
-          <option value="">Selecione</option>
-          <option value="36">36</option>
-          <option value="38">38</option>
-          <option value="40">40</option>
-          <option value="42">42</option>
-        </select>
-      </label>
-      <label>
-        Quantidade:
-        <input type="number" class="quantidade" min="1" value="1" />
-      </label>
-      <button class="btn-adicionar">Adicionar à lista</button>
-    </div>
-
+  <div class="produto" data-codigo="CAM001" data-nome="Camiseta Básica" data-preco="50" data-estoque="10">
+    <h2>Código: CAM001 - Camiseta Básica</h2>
+    <p>Preço unitário: R$ 50,00</p>
+    <p>Estoque disponível: <span class="estoque">10</span></p>
+    <label>Cor:
+      <select class="cor">
+        <option value="">Selecione</option>
+        <option>Preto</option>
+        <option>Branco</option>
+        <option>Azul</option>
+      </select>
+    </label>
+    <label>Tamanho:
+      <select class="tamanho">
+        <option value="">Selecione</option>
+        <option>P</option>
+        <option>M</option>
+        <option>G</option>
+        <option>GG</option>
+      </select>
+    </label>
+    <label>Quantidade:
+      <input type="number" class="quantidade" value="1" min="1" />
+    </label>
+    <button class="btn-adicionar">Adicionar à lista</button>
   </div>
 
-  <div id="listaCompra" style="display:none;">
-    <h3>Lista de Compra (edite cores, tamanhos, quantidades ou remova itens)</h3>
-    <table id="tabelaLista">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Produto</th>
-          <th>Cor</th>
-          <th>Tamanho</th>
-          <th>Quantidade</th>
-          <th>Preço Unit.</th>
-          <th>Total</th>
-          <th>Remover</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- linhas vão aqui -->
-      </tbody>
-    </table>
-    <button id="enviarWhatsappBtn" style="margin-top: 15px;">Enviar por WhatsApp</button>
+  <div class="produto" data-codigo="CAL002" data-nome="Calça Jeans" data-preco="120" data-estoque="5">
+    <h2>Código: CAL002 - Calça Jeans</h2>
+    <p>Preço unitário: R$ 120,00</p>
+    <p>Estoque disponível: <span class="estoque">5</span></p>
+    <label>Cor:
+      <select class="cor">
+        <option value="">Selecione</option>
+        <option>Azul Claro</option>
+        <option>Azul Escuro</option>
+        <option>Preto</option>
+      </select>
+    </label>
+    <label>Tamanho:
+      <select class="tamanho">
+        <option value="">Selecione</option>
+        <option>36</option>
+        <option>38</option>
+        <option>40</option>
+        <option>42</option>
+      </select>
+    </label>
+    <label>Quantidade:
+      <input type="number" class="quantidade" value="1" min="1" />
+    </label>
+    <button class="btn-adicionar">Adicionar à lista</button>
   </div>
 
-  <div id="graficos" style="display:none;">
-    <canvas id="graficoCores" width="300" height="300"></canvas>
-    <canvas id="graficoTamanhos" width="300" height="300"></canvas>
-  </div>
+</div>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div id="listaCompra">
+  <h3>Lista de Compra</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Cor</th>
+        <th>Tamanho</th>
+        <th>Quantidade</th>
+        <th>Preço Unit.</th>
+        <th>Total</th>
+        <th>Remover</th>
+      </tr>
+    </thead>
+    <tbody id="lista-corpo">
+      <!-- Itens da lista -->
+    </tbody>
+  </table>
+</div>
 
-  <script>
-    // Produtos com estoque
-    const produtos = [
-      {
-        id: 1,
-        codigo: 'CAM001',
-        nome: 'Camiseta Básica',
-        preco: 50.00,
-        estoque: 10,
-        cores: ['Preto', 'Branco', 'Azul'],
-        tamanhos: ['P', 'M', 'G', 'GG'],
-      },
-      {
-        id: 2,
-        codigo: 'CAL002',
-        nome: 'Calça Jeans',
-        preco: 120.00,
-        estoque: 5,
-        cores: ['Azul Claro', 'Azul Escuro', 'Preto'],
-        tamanhos: ['36', '38', '40', '42'],
-      }
-    ];
-
-    const listaCompraDiv = document.getElementById('listaCompra');
-    const tabelaLista = document.getElementById('tabelaLista').querySelector('tbody');
-    const enviarWhatsappBtn = document.getElementById('enviarWhatsappBtn');
-    const graficosDiv = document.getElementById('graficos');
-
-    // Atualizar estoque visível na página
-    function atualizarEstoqueNaPagina() {
-      produtos.forEach(p => {
-        const produtoDiv = [...document.querySelectorAll('.produto')].find(div => div.dataset.codigo === p.codigo);
-        if (produtoDiv) {
-          produtoDiv.querySelector('.estoque').textContent = p.estoque;
-        }
-      });
+<script>
+  // Função para atualizar a quantidade de um item já na lista (soma com a nova)
+  function atualizarQuantidadeExistente(tr, novaQtd, estoque){
+    const inputQtd = tr.querySelector('.input-quantidade');
+    const qtdAtual = parseInt(inputQtd.value);
+    let somaQtd = qtdAtual + novaQtd;
+    if (somaQtd > estoque) {
+      alert('Quantidade máxima disponível no estoque: ' + estoque);
+      somaQtd = estoque;
     }
-    atualizarEstoqueNaPagina();
+    inputQtd.value = somaQtd;
+    atualizarTotal(tr);
+  }
 
-    // Botões "Adicionar à lista"
-    document.querySelectorAll('.btn-adicionar').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const produtoDiv = btn.closest('.produto');
-        const codigo = produtoDiv.dataset.codigo;
-        const nome = produtoDiv.dataset.nome;
-        const produto = produtos.find(p => p.codigo === codigo);
+  // Atualiza o total de uma linha
+  function atualizarTotal(tr){
+    const preco = parseFloat(tr.dataset.preco);
+    const qtd = parseInt(tr.querySelector('.input-quantidade').value);
+    const totalTd = tr.querySelector('.total');
+    totalTd.textContent = 'R$ ' + (preco * qtd).toFixed(2);
+  }
 
-        const cor = produtoDiv.querySelector('.cor').value;
-        const tamanho = produtoDiv.querySelector('.tamanho').value;
-        let quantidade = parseInt(produtoDiv.querySelector('.quantidade').value);
+  // Verifica se a combinação já existe na lista (código + cor + tamanho)
+  function itemExiste(codigo, cor, tamanho){
+    const linhas = document.querySelectorAll('#lista-corpo tr');
+    for(const tr of linhas){
+      if(
+        tr.dataset.codigo === codigo &&
+        tr.querySelector('.select-cor').value === cor &&
+        tr.querySelector('.select-tamanho').value === tamanho
+      ){
+        return tr;
+      }
+    }
+    return null;
+  }
 
-        if (!cor) {
-          alert('Selecione a cor.');
-          return;
-        }
-        if (!tamanho) {
-          alert('Selecione o tamanho.');
-          return;
-        }
-        if (!quantidade || quantidade < 1) {
-          alert('Quantidade deve ser maior que zero.');
-          return;
-        }
-
-        // Quantidade já na lista para a mesma combinação
-        const qtdNaLista = obterQuantidadeNaLista(codigo, cor, tamanho);
-        if (quantidade + qtdNaLista > produto.estoque) {
-          alert(`Quantidade indisponível no estoque. Estoque disponível para esta combinação: ${produto.estoque - qtdNaLista}`);
-          return;
-        }
-
-        adicionarItemNaLista({codigo, nome, cor, tamanho, quantidade, preco: produto.preco});
-        listaCompraDiv.style.display = 'block';
-        graficosDiv.style.display = 'flex';
-        atualizarGraficos();
-      });
+  // Atualiza a exibição do estoque na página
+  function atualizarEstoqueNaPagina(){
+    const produtos = document.querySelectorAll('.produto');
+    produtos.forEach(prod => {
+      const estoque = parseInt(prod.dataset.estoque);
+      prod.querySelector('.estoque').textContent = estoque;
     });
+  }
+  atualizarEstoqueNaPagina();
 
-    // Quantidade já na lista para dado código, cor, tamanho
-    function obterQuantidadeNaLista(codigo, cor, tamanho) {
-      let soma = 0;
-      for (const tr of tabelaLista.rows) {
-        const codigoTd = tr.querySelector('.td-codigo').textContent;
-        const corSelect = tr.querySelector('.select-cor').value;
-        const tamanhoSelect = tr.querySelector('.select-tamanho').value;
-        if (codigoTd === codigo && corSelect === cor && tamanhoSelect === tamanho) {
-          soma += parseInt(tr.querySelector('.input-quantidade').value);
-        }
+  // Evento dos botões "Adicionar à lista"
+  document.querySelectorAll('.btn-adicionar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const produtoDiv = btn.closest('.produto');
+      const codigo = produtoDiv.dataset.codigo;
+      const nome = produtoDiv.dataset.nome;
+      const preco = parseFloat(produtoDiv.dataset.preco);
+      const estoque = parseInt(produtoDiv.dataset.estoque);
+
+      const corSelect = produtoDiv.querySelector('.cor');
+      const tamanhoSelect = produtoDiv.querySelector('.tamanho');
+      const qtdInput = produtoDiv.querySelector('.quantidade');
+
+      const cor = corSelect.value;
+      const tamanho = tamanhoSelect.value;
+      const quantidade = parseInt(qtdInput.value);
+
+      if (!cor) {
+        alert('Selecione a cor');
+        return;
       }
-      return soma;
-    }
-
-    // Adicionar item na tabela
-    function adicionarItemNaLista(item) {
-      // Verifica se já existe um item com mesmo código, cor e tamanho
-      const linhas = Array.from(tabelaLista.querySelectorAll('tr'));
-      for (const linha of linhas) {
-        const codigoTd = linha.querySelector('.td-codigo').textContent;
-        const corSelect = linha.querySelector('.select-cor');
-        const tamanhoSelect = linha.querySelector('.select-tamanho');
-        if (codigoTd === item.codigo && corSelect.value === item.cor && tamanhoSelect.value === item.tamanho) {
-          let qtdAtual = parseInt(linha.querySelector('.input-quantidade').value);
-          let novaQtd = qtdAtual + item.quantidade;
-          const produto = produtos.find(p => p.codigo === item.codigo);
-          if (novaQtd > produto.estoque) {
-            alert(`Quantidade máxima no estoque para este item é ${produto.estoque}.`);
-            novaQtd = produto.estoque;
-          }
-          linha.querySelector('.input-quantidade').value = novaQtd;
-          atualizarTotalLinha(linha, item.preco, novaQtd);
-          atualizarGraficos();
-          return;
-        }
+      if (!tamanho) {
+        alert('Selecione o tamanho');
+        return;
       }
-
-      const tr = document.createElement('tr');
-
-      // Código
-      const tdCodigo = document.createElement('td');
-      tdCodigo.textContent = item.codigo;
-      tdCodigo.classList.add('td-codigo');
-      tr.appendChild(tdCodigo);
-
-      // Nome
-      const tdNome = document.createElement('td');
-      tdNome.textContent = item.nome;
-      tr.appendChild(tdNome);
-
-      // Cor (select)
-      const tdCor = document.createElement('td');
-      const selectCor = document.createElement('select');
-      selectCor.classList.add('select-cor');
-      const opcoesCor = produtos.find(p => p.codigo === item.codigo).cores;
-      for (const corOp of opcoesCor) {
-        const option = document.createElement('option');
-        option.value = corOp;
-        option.textContent = corOp;
-        if (corOp === item.cor) option.selected = true;
-        selectCor.appendChild(option);
-      }
-      tdCor.appendChild(selectCor);
-      tr.appendChild(tdCor);
-
-      // Tamanho (select)
-      const tdTamanho = document.createElement('td');
-      const selectTam = document.createElement('select');
-      selectTam.classList.add('select-tamanho');
-      const opcoesTam = produtos.find(p => p.codigo === item.codigo).tamanhos;
-      for (const tamOp of opcoesTam) {
-        const option = document.createElement('option');
-        option.value = tamOp;
-        option.textContent = tamOp;
-        if (tamOp === item.tamanho) option.selected = true;
-        selectTam.appendChild(option);
-      }
-      tdTamanho.appendChild(selectTam);
-      tr.appendChild(tdTamanho);
-
-      // Quantidade (input)
-      const tdQuantidade = document.createElement('td');
-      const inputQtd = document.createElement('input');
-      inputQtd.type = 'number';
-      inputQtd.min = 1;
-      inputQtd.value = item.quantidade;
-      inputQtd.classList.add('input-quantidade');
-      tdQuantidade.appendChild(inputQtd);
-      tr.appendChild(tdQuantidade);
-
-      // Preço Unitário
-      const tdPreco = document.createElement('td');
-      tdPreco.textContent = `R$ ${item.preco.toFixed(2)}`;
-      tr.appendChild(tdPreco);
-
-      // Total
-      const tdTotal = document.createElement('td');
-      tdTotal.classList.add('td-total');
-      tdTotal.textContent = `R$ ${(item.preco * item.quantidade).toFixed(2)}`;
-      tr.appendChild(tdTotal);
-
-      // Remover
-      const tdRemover = document.createElement('td');
-      const btnRemover = document.createElement('button');
-      btnRemover.textContent = 'X';
-      btnRemover.classList.add('btn-remover');
-      btnRemover.addEventListener('click', () => {
-        tr.remove();
-        if (tabelaLista.rows.length === 0) {
-          listaCompraDiv.style.display = 'none';
-          graficosDiv.style.display = 'none';
-        } else {
-          atualizarGraficos();
-        }
-      });
-      tdRemover.appendChild(btnRemover);
-      tr.appendChild(tdRemover);
-
-      // Atualiza total e valida quantidade
-      function validarEstoqueCombo() {
-        const codigo = item.codigo;
-        const cor = selectCor.value;
-        const tamanho = selectTam.value;
-        let qtd = parseInt(inputQtd.value);
-        const produto = produtos.find(p => p.codigo === codigo);
-
-        // Soma quantidades nas outras linhas com mesma combinação
-        let somaOutrasLinhas = 0;
-        for (const linha of tabelaLista.rows) {
-          if (linha === tr) continue;
-          const c = linha.querySelector('.td-codigo').textContent;
-          const corL = linha.querySelector('.select-cor').value;
-          const tamL = linha.querySelector('.select-tamanho').value;
-          if (c === codigo && corL === cor && tamL === tamanho) {
-            somaOutrasLinhas += parseInt(linha.querySelector('.input-quantidade').value);
-          }
-        }
-
-        const maxDisponivel = produto.estoque - somaOutrasLinhas;
-
-        if (isNaN(qtd) || qtd < 1) {
-          qtd = 1;
-        }
-
-        if (qtd > maxDisponivel) {
-          alert(`Quantidade máxima disponível no estoque para esta combinação: ${maxDisponivel}`);
-          qtd = maxDisponivel;
-        }
-
-        inputQtd.value = qtd;
-        atualizarTotalLinha(tr, item.preco, qtd);
-        atualizarGraficos();
-      }
-
-      inputQtd.addEventListener('input', validarEstoqueCombo);
-      selectCor.addEventListener('change', validarEstoqueCombo);
-      selectTam.addEventListener('change', validarEstoqueCombo);
-
-      tabelaLista.appendChild(tr);
-    }
-
-    // Atualiza total da linha (preço x quantidade)
-    function atualizarTotalLinha(tr, preco, qtd) {
-      const tdTotal = tr.querySelector('.td-total');
-      tdTotal.textContent = `R$ ${(preco * qtd).toFixed(2)}`;
-    }
-
-    // Enviar WhatsApp
-    enviarWhatsappBtn.addEventListener('click', () => {
-      if (tabelaLista.rows.length === 0) {
-        alert('Lista vazia.');
+      if (!quantidade || quantidade < 1) {
+        alert('Quantidade inválida');
         return;
       }
 
-      let linhasTexto = [];
-      for (const tr of tabelaLista.rows) {
-        const codigo = tr.querySelector('.td-codigo').textContent;
-        const nome = tr.children[1].textContent;
-        const cor = tr.querySelector('.select-cor').value;
-        const tamanho = tr.querySelector('.select-tamanho').value;
-        const qtd = tr.querySelector('.input-quantidade').value;
-        const total = tr.querySelector('.td-total').textContent;
-
-        linhasTexto.push(`Código: ${codigo} | Produto: ${nome} | Cor: ${cor} | Tamanho: ${tamanho} | Quantidade: ${qtd} | Total: ${total}`);
+      // Verifica estoque (considerando quantidade já na lista)
+      let trExistente = itemExiste(codigo, cor, tamanho);
+      let qtdNaLista = 0;
+      if(trExistente){
+        qtdNaLista = parseInt(trExistente.querySelector('.input-quantidade').value);
       }
-      const texto = encodeURIComponent(linhasTexto.join('\n'));
-      const telefone = ''; // Coloque o telefone no formato internacional aqui (ex: 5511999999999)
+      if(quantidade + qtdNaLista > estoque){
+        alert('Quantidade indisponível no estoque. Estoque disponível: ' + (estoque - qtdNaLista));
+        return;
+      }
+
+      // Adicionar na lista
+      if(trExistente){
+        atualizarQuantidadeExistente(trExistente, quantidade, estoque);
+      } else {
+        adicionarLinhaLista(codigo, nome, cor, tamanho, quantidade, preco, estoque);
+      }
+
+      document.getElementById('listaCompra').style.display = 'block';
+
+      // Resetar seleções para padrão
+      corSelect.value = '';
+      tamanhoSelect.value = '';
+      qtdInput.value = 1;
+    });
+  });
+
+  // Função para adicionar linha nova na tabela
+  function adicionarLinhaLista(codigo, nome, cor, tamanho, quantidade, preco, estoque){
+    const tbody = document.getElementById('lista-corpo');
+
+    const tr = document.createElement('tr');
+    tr.dataset.codigo = codigo;
+    tr.dataset.preco = preco;
+
+    // Código (fixo)
+    const tdCodigo = document.createElement('td');
+    tdCodigo.textContent = codigo;
+    tr.appendChild(tdCodigo);
+
+    // Nome (fixo)
+    const tdNome = document.createElement('td');
+    tdNome.textContent = nome;
+    tr.appendChild(tdNome);
+
+    // Cor (select editável)
+    const tdCor = document.createElement('td');
+    const selectCor = document.createElement('select');
+    selectCor.classList.add('select-cor');
+    // Opções baseadas no produto
+    const opcoesCor = getOpcoes(codigo, 'cor');
+    opcoesCor.forEach(corOp => {
+      const option = document.createElement('option');
+      option.value = corOp;
+      option.textContent = corOp;
+      if(corOp === cor) option.selected = true;
+      selectCor.appendChild(option);
+    });
+    tdCor.appendChild(selectCor);
+    tr.appendChild(tdCor);
+
+    // Tamanho (select editável)
+    const tdTam = document.createElement('td');
+    const selectTam = document.createElement('select');
+    selectTam.classList.add('select-tamanho');
+    const opcoesTam = getOpcoes(codigo, 'tamanho');
+    opcoesTam.forEach(tamOp => {
+      const option = document.createElement('option');
+      option.value = tamOp;
+      option.textContent = tamOp;
+      if(tamOp === tamanho) option.selected = true;
+      selectTam.appendChild(option);
+    });
+    tdTam.appendChild(selectTam);
+    tr.appendChild(tdTam);
+
+    // Quantidade (input number editável)
+    const tdQtd = document.createElement('td');
+    const inputQtd = document.createElement('input');
+    inputQtd.type = 'number';
+    inputQtd.min = 1;
+    inputQtd.value = quantidade;
+    inputQtd.classList.add('input-quantidade');
+    tdQtd.appendChild(inputQtd);
+    tr.appendChild(tdQtd);
+
+    // Preço unitário (fixo)
+    const tdPreco = document.createElement('td');
+    tdPreco.textContent = 'R$ ' + preco.toFixed(2);
+    tr.appendChild(tdPreco);
+
+    // Total (preço * quantidade)
+    const tdTotal = document.createElement('td');
+    tdTotal.classList.add('total');
+    tdTotal.textContent = 'R$ ' + (preco * quantidade).toFixed(2);
+    tr.appendChild(tdTotal);
+
+    // Botão remover
+    const tdRemover = document.createElement('td');
+    const btnRemover = document.createElement('button');
+    btnRemover.classList.add('btn-remover');
+    btnRemover.textContent = 'X';
+    btnRemover.addEventListener('click', () => {
+      tr.remove();
+      if(document.getElementById('lista-corpo').children.length === 0){
+        document.getElementById('listaCompra').style.display = 'none';
+      }
+    });
+    tdRemover.appendChild(btnRemover);
+    tr.appendChild(tdRemover);
+
+    // Eventos para validar quantidade máximo e atualizar total
+    function validarQtd(){
+      let qtd = parseInt(inputQtd.value);
+      if(isNaN(qtd) || qtd < 1) qtd = 1;
+
+      // Validar estoque total para essa combinação
+      const estoqueTotal = getEstoque(codigo);
+      let somaOutros = 0;
+      const linhas = document.querySelectorAll('#lista-corpo tr');
+      linhas.forEach(linha => {
+        if(linha !== tr){
+          const c = linha.dataset.codigo;
+          const corLinha = linha.querySelector('.select-cor').value;
+          const tamLinha = linha.querySelector('.select-tamanho').value;
+          if(c === codigo && corLinha === selectCor.value && tamLinha === selectTam.value){
+            somaOutros += parseInt(linha.querySelector('.input-quantidade').value);
+          }
+        }
+      });
+      if(qtd + somaOutros > estoqueTotal){
+        alert('Quantidade máxima disponível no estoque para essa combinação: ' + (estoqueTotal - somaOutros));
+        qtd = estoqueTotal - somaOutros;
+        if(qtd < 1) qtd = 1;
+      }
+      inputQtd.value = qtd;
+      atualizarTotal(tr);
+    }
+
+    inputQtd.addEventListener('input', validarQtd);
+
+    // Atualiza quantidade ao mudar cor ou tamanho para evitar duplicidade e validar estoque
+    function validarCombo(){
+      // Se já existir outra linha com essa combinação, avisa
+      const linhas = document.querySelectorAll('#lista-corpo tr');
+      linhas.forEach(linha => {
+        if(linha !== tr){
+          if(
+            linha.dataset.codigo === codigo &&
+            linha.querySelector('.select-cor').value === selectCor.value &&
+            linha.querySelector('.select-tamanho').value === selectTam.value
+          ){
+            alert('Já existe essa combinação na lista. Edite a quantidade nesse item.');
+            // Reseta para a anterior
+            selectCor.value = cor;
+            selectTam.value = tamanho;
+          }
+        }
+      });
+      validarQtd();
+    }
+
+    selectCor.addEventListener('change', validarCombo);
+    selectTam.addEventListener('change', validarCombo);
+
+    tbody.appendChild(tr);
+  }
+
+  // Função para retornar as opções de cor ou tamanho baseado no código do produto
+  function getOpcoes(codigo, tipo){
+    const produtoDiv = [...document.querySelectorAll('.produto')].find(p => p.dataset.codigo === codigo);
+    if(!produtoDiv) return [];
+    if(tipo === 'cor') {
+      return Array.from(produtoDiv.querySelector('.cor').options).map(opt => opt.value).filter(v => v);
+    }
+    if(tipo === 'tamanho') {
+      return Array.from(produtoDiv.querySelector('.tamanho').options).map(opt => opt.value).filter(v => v);
+    }
+    return [];
+  }
+
+  // Função para pegar o estoque disponível do produto
+  function getEstoque(codigo){
+    const produtoDiv = [...document.querySelectorAll('.produto')].find(p => p.dataset.codigo === codigo);
+    if(!produtoDiv) return 0;
+    return parseInt(produtoDiv.dataset.estoque);
+  }
+</script>
+
+</body>
+</html>

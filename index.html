@@ -106,8 +106,6 @@
     };
 
     let corSelecionada = null;
-    let tamanhoSelecionado = null;
-    let qtdSelecionada = 1;
 
     produto.querySelectorAll('.cor').forEach(corEl => {
       const cor = corEl.dataset.cor;
@@ -136,7 +134,6 @@
 
     function mostrarTamanhos() {
       tamanhosDiv.innerHTML = '';
-      tamanhoSelecionado = null;
       if (!estoque[corSelecionada]) return;
 
       Object.entries(estoque[corSelecionada]).forEach(([tam, disp]) => {
@@ -147,12 +144,6 @@
 
         if (disp > 0) {
           tamEl.innerHTML = `${tam} <input class="quantidade" type="number" min="1" max="${disp}" value="1">`;
-          tamEl.addEventListener('click', () => {
-            tamanhosDiv.querySelectorAll('.tam').forEach(t => t.classList.remove('selecionado'));
-            tamEl.classList.add('selecionado');
-            tamanhoSelecionado = tam;
-            qtdSelecionada = parseInt(tamEl.querySelector('input').value);
-          });
         } else {
           tamEl.classList.add('indisponivel');
           tamEl.textContent = `${tam} ✖`;
@@ -162,31 +153,41 @@
     }
 
     produto.querySelector('.adicionar').addEventListener('click', () => {
-      if (!corSelecionada || !tamanhoSelecionado || !qtdSelecionada) {
-        alert('Selecione cor, tamanho e quantidade.');
+      if (!corSelecionada) {
+        alert('Selecione uma cor.');
         return;
       }
-
-      const disp = estoque[corSelecionada][tamanhoSelecionado];
-      const input = tamanhosDiv.querySelector('.tam.selecionado input');
-      const qtd = parseInt(input.value);
-      if (qtd > disp) {
-        alert(`Quantidade não disponível. Estoque: ${disp}`);
-        return;
-      }
-
       const codigo = produto.dataset.codigo;
       const nome = produto.dataset.nome;
 
-      const existente = listaItens.find(i => i.codigo === codigo && i.cor === corSelecionada && i.tamanho === tamanhoSelecionado);
-      if (existente) {
-        if (existente.qtd + qtd > disp) {
-          alert(`Não é possível adicionar mais do que o estoque disponível.`);
-          return;
+      const tamEls = Array.from(tamanhosDiv.querySelectorAll('.tam'));
+      let algumSelecionado = false;
+
+      tamEls.forEach(tamEl => {
+        if (tamEl.classList.contains('indisponivel')) return;
+        const tam = tamEl.dataset.tam;
+        const input = tamEl.querySelector('input');
+        const qtd = parseInt(input.value);
+        const disp = parseInt(tamEl.dataset.disp);
+
+        if (qtd > 0 && qtd <= disp) {
+          algumSelecionado = true;
+          const existente = listaItens.find(i => i.codigo === codigo && i.cor === corSelecionada && i.tamanho === tam);
+          if (existente) {
+            if (existente.qtd + qtd > disp) {
+              alert(`Estoque insuficiente para ${tam}. Disponível: ${disp}`);
+            } else {
+              existente.qtd += qtd;
+            }
+          } else {
+            listaItens.push({ codigo, nome, cor: corSelecionada, tamanho: tam, qtd });
+          }
         }
-        existente.qtd += qtd;
-      } else {
-        listaItens.push({ codigo, nome, cor: corSelecionada, tamanho: tamanhoSelecionado, qtd });
+      });
+
+      if (!algumSelecionado) {
+        alert('Informe a quantidade para pelo menos um tamanho.');
+        return;
       }
 
       atualizarTabela();

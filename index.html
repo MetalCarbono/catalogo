@@ -32,6 +32,7 @@
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     .resumo { margin-top: 15px; font-weight: bold; }
+    .estoque-info { font-size: 12px; color: #666; margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -46,6 +47,8 @@
       <div class="cor azul" data-cor="Azul"></div>
       <div class="cor verde" data-cor="Verde"></div>
     </div>
+
+    <div class="estoque-info" id="info-estoque"></div>
 
     <div><strong>Tamanhos Disponíveis:</strong></div>
     <div class="tamanhos"></div>
@@ -75,6 +78,7 @@
   <script>
     const produto = document.querySelector('.produto');
     const tamanhosDiv = produto.querySelector('.tamanhos');
+    const infoEstoque = document.getElementById('info-estoque');
     const listaItens = [];
 
     const estoque = {
@@ -92,9 +96,18 @@
         produto.querySelectorAll('.cor').forEach(c => c.classList.remove('selecionado'));
         corEl.classList.add('selecionado');
         corSelecionada = corEl.dataset.cor;
+        mostrarEstoque();
         mostrarTamanhos();
       });
     });
+
+    function mostrarEstoque() {
+      const disp = estoque[corSelecionada];
+      if (!disp) return;
+      let info = `<strong>Estoque ${corSelecionada}:</strong> `;
+      info += Object.entries(disp).map(([t, q]) => `${t}: ${q}`).join(', ');
+      infoEstoque.innerHTML = info;
+    }
 
     function mostrarTamanhos() {
       tamanhosDiv.innerHTML = '';
@@ -182,7 +195,7 @@
         msg += `*${item.nome}* (${item.codigo}) - Cor: ${item.cor}, Tam: ${item.tamanho}, Qtd: ${item.qtd}%0A`;
       });
       msg += `%0ATotal de itens: ${listaItens.reduce((s, i) => s + i.qtd, 0)}`;
-      const url = `https://wa.me/5511973327880?text=${msg}`;
+      const url = `https://wa.me/5511999999999?text=${msg}`;
       window.open(url, '_blank');
     }
   </script>

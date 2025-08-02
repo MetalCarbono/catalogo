@@ -1,471 +1,185 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<title>Catálogo com Cores Visuais e Lista Editável</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; background:#f5f5f5; }
-  h1 { text-align:center; margin-bottom: 30px; }
-  .produto { background:#fff; padding:15px; border-radius:8px; max-width: 700px; margin: 0 auto 40px; }
-  .produto h2 { margin-top:0; }
-  .cores, .tamanhos {
-    margin: 10px 0;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .cor-quadrado, .tamanho-quadrado {
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 4px;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    transition: border-color 0.3s;
-  }
-  .cor-quadrado {
-    width: 30px;
-    height: 30px;
-  }
-  .tamanho-quadrado {
-    width: 35px;
-    height: 35px;
-    background: #eee;
-    color: #333;
-  }
-  .cor-quadrado.selecionado, .tamanho-quadrado.selecionado {
-    border-color: #007bff;
-  }
-  .cor-quadrado[data-cor="Branco"] {
-    background: #fff;
-    border: 1px solid #ccc;
-  }
-  .cor-quadrado[data-cor="Preto"] {
-    background: #000;
-  }
-  .cor-quadrado[data-cor="Azul"] {
-    background: #007bff;
-  }
-  .cor-quadrado[data-cor="Azul Claro"] {
-    background: #66b0ff;
-  }
-  .cor-quadrado[data-cor="Azul Escuro"] {
-    background: #004080;
-  }
-  #quantidade {
-    width: 60px;
-    padding: 5px;
-    font-size: 16px;
-    margin-left: 10px;
-  }
-  button {
-    padding: 10px 15px;
-    font-size: 16px;
-    border: none;
-    background: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background: #0056b3;
-  }
-  #msgErro {
-    color: red;
-    margin-top: 10px;
-    min-height: 18px;
-  }
-  #listaCompra {
-    background:#fff;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 15px;
-    border-radius: 8px;
-    display: none;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-  }
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-  }
-  th {
-    background: #007bff;
-    color: white;
-  }
-  select, input[type=number] {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .btn-remover {
-    background: #dc3545;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .btn-remover:hover {
-    background: #a71d2a;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Catálogo de Produtos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+    h2 { margin-top: 40px; }
+    .produto { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: white; }
+    .cores, .tamanhos { display: flex; gap: 5px; margin: 10px 0; }
+    .cor, .tam {
+      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #ccc; border-radius: 4px; cursor: pointer;
+    }
+    .cor.selecionado, .tam.selecionado { border: 2px solid black; }
+    .cor { text-indent: -9999px; }
+    .cor.vermelho { background: red; }
+    .cor.azul { background: blue; }
+    .cor.verde { background: green; }
+    .tam { background: #eee; }
+    .btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .btn:hover { background: #0056b3; }
+    .lista { margin-top: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    .resumo { margin-top: 15px; font-weight: bold; }
+  </style>
 </head>
 <body>
 
-<h1>Catálogo Online - Camiseta Básica</h1>
+  <h1>Catálogo de Produtos</h1>
 
-<div class="produto" data-codigo="CAM001" data-nome="Camiseta Básica" data-preco="50" data-estoque='{"Preto":{"P":10,"M":8,"G":5},"Branco":{"P":7,"M":4},"Azul":{"M":6,"G":2,"GG":3}}'>
-  <h2>Código: CAM001 - Camiseta Básica</h2>
-  <p>Preço unitário: R$ 50,00</p>
-  <p>Estoque disponível (por cor e tamanho):</p>
-  <ul>
-    <li>Preto: P(10), M(8), G(5)</li>
-    <li>Branco: P(7), M(4)</li>
-    <li>Azul: M(6), G(2), GG(3)</li>
-  </ul>
-
-  <div>
-    <strong>Selecione a Cor:</strong>
+  <div class="produto" data-codigo="001" data-nome="Camiseta Básica" data-descricao="Camiseta 100% algodão">
+    <h3>Camiseta Básica (001)</h3>
+    <p>Camiseta 100% algodão</p>
+    <div><strong>Cores:</strong></div>
     <div class="cores">
-      <div class="cor-quadrado" data-cor="Preto" title="Preto"></div>
-      <div class="cor-quadrado" data-cor="Branco" title="Branco"></div>
-      <div class="cor-quadrado" data-cor="Azul" title="Azul"></div>
+      <div class="cor vermelho" data-cor="Vermelho"></div>
+      <div class="cor azul" data-cor="Azul"></div>
+      <div class="cor verde" data-cor="Verde"></div>
     </div>
-  </div>
-
-  <div>
-    <strong>Selecione o Tamanho:</strong>
+    <div><strong>Tamanhos:</strong></div>
     <div class="tamanhos">
-      <!-- Tamanhos aparecerão aqui conforme cor -->
+      <div class="tam" data-tam="P" data-disponivel="3">P</div>
+      <div class="tam" data-tam="M" data-disponivel="2">M</div>
+      <div class="tam" data-tam="G" data-disponivel="4">G</div>
+    </div>
+    <div>
+      <label>Quantidade: <input type="number" min="1" value="1" class="quantidade"></label>
+      <button class="btn adicionar">Adicionar à Lista</button>
     </div>
   </div>
 
-  <div style="margin-top:15px;">
-    <label for="quantidade">Quantidade:</label>
-    <input type="number" id="quantidade" min="1" value="1" />
+  <!-- Mais produtos podem ser duplicados com mesmo formato acima -->
+
+  <div class="lista">
+    <h2>Lista de Compras</h2>
+    <table id="tabela-lista">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Produto</th>
+          <th>Cor</th>
+          <th>Tamanho</th>
+          <th>Qtd</th>
+          <th>Remover</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="resumo">Total de Itens: <span id="total-itens">0</span></div>
+    <button class="btn" onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
   </div>
 
-  <div id="msgErro"></div>
+  <script>
+    let lista = [];
 
-  <button id="btnAdicionar">Adicionar à lista</button>
-</div>
+    document.querySelectorAll('.produto').forEach(produto => {
+      let corSelecionada = null;
+      let tamanhoSelecionado = null;
 
-<div id="listaCompra">
-  <h3>Lista de Compra</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Produto</th>
-        <th>Cor</th>
-        <th>Tamanho</th>
-        <th>Quantidade</th>
-        <th>Preço Unit.</th>
-        <th>Total</th>
-        <th>Remover</th>
-      </tr>
-    </thead>
-    <tbody id="lista-corpo">
-      <!-- Itens adicionados aqui -->
-    </tbody>
-  </table>
-</div>
+      const cores = produto.querySelectorAll('.cor');
+      const tamanhos = produto.querySelectorAll('.tam');
+      const btnAdicionar = produto.querySelector('.adicionar');
+      const inputQtd = produto.querySelector('.quantidade');
 
-<script>
-  const produtoDiv = document.querySelector('.produto');
-  const estoqueObj = JSON.parse(produtoDiv.dataset.estoque);
-  const coresDiv = produtoDiv.querySelector('.cores');
-  const tamanhosDiv = produtoDiv.querySelector('.tamanhos');
-  const quantidadeInput = produtoDiv.querySelector('#quantidade');
-  const msgErro = produtoDiv.querySelector('#msgErro');
-  const listaCompra = document.getElementById('listaCompra');
-  const listaCorpo = document.getElementById('lista-corpo');
-
-  let corSelecionada = null;
-  let tamanhoSelecionado = null;
-
-  function limparSelecaoCor() {
-    coresDiv.querySelectorAll('.cor-quadrado').forEach(el => el.classList.remove('selecionado'));
-  }
-  function limparTamanhos() {
-    tamanhosDiv.innerHTML = '';
-    tamanhoSelecionado = null;
-  }
-
-  function mostrarTamanhos(cor) {
-    limparTamanhos();
-    if (!cor || !estoqueObj[cor]) return;
-
-    Object.keys(estoqueObj[cor]).forEach(tam => {
-      const div = document.createElement('div');
-      div.classList.add('tamanho-quadrado');
-      div.textContent = tam;
-      div.dataset.tamanho = tam;
-      div.title = `${tam} (Estoque: ${estoqueObj[cor][tam]})`;
-
-      div.addEventListener('click', () => {
-        tamanhosDiv.querySelectorAll('.tamanho-quadrado').forEach(el => el.classList.remove('selecionado'));
-        div.classList.add('selecionado');
-        tamanhoSelecionado = tam;
-        msgErro.textContent = '';
-      });
-
-      tamanhosDiv.appendChild(div);
-    });
-  }
-
-  coresDiv.querySelectorAll('.cor-quadrado').forEach(div => {
-    div.addEventListener('click', () => {
-      limparSelecaoCor();
-      div.classList.add('selecionado');
-      corSelecionada = div.dataset.cor;
-      msgErro.textContent = '';
-      mostrarTamanhos(corSelecionada);
-    });
-  });
-
-  function atualizarTotal(tr) {
-    const preco = parseFloat(tr.dataset.preco);
-    const qtd = parseInt(tr.querySelector('.input-quantidade').value);
-    const totalTd = tr.querySelector('.total');
-    totalTd.textContent = 'R$ ' + (preco * qtd).toFixed(2);
-  }
-
-  function itemExiste(codigo, cor, tamanho) {
-    const linhas = listaCorpo.querySelectorAll('tr');
-    for (const tr of linhas) {
-      if (
-        tr.dataset.codigo === codigo &&
-        tr.querySelector('.select-cor').value === cor &&
-        tr.querySelector('.select-tamanho').value === tamanho
-      ) {
-        return tr;
-      }
-    }
-    return null;
-  }
-
-  function adicionarLinhaLista(codigo, nome, cor, tamanho, quantidade, preco) {
-    const tr = document.createElement('tr');
-    tr.dataset.codigo = codigo;
-    tr.dataset.preco = preco;
-
-    // Código
-    const tdCodigo = document.createElement('td');
-    tdCodigo.textContent = codigo;
-    tr.appendChild(tdCodigo);
-
-    // Nome
-    const tdNome = document.createElement('td');
-    tdNome.textContent = nome;
-    tr.appendChild(tdNome);
-
-    // Cor (select)
-    const tdCor = document.createElement('td');
-    const selectCor = document.createElement('select');
-    selectCor.classList.add('select-cor');
-    Object.keys(estoqueObj).forEach(c => {
-      const option = document.createElement('option');
-      option.value = c;
-      option.textContent = c;
-      if (c === cor) option.selected = true;
-      selectCor.appendChild(option);
-    });
-    tdCor.appendChild(selectCor);
-    tr.appendChild(tdCor);
-
-    // Tamanho (select)
-    const tdTam = document.createElement('td');
-    const selectTam = document.createElement('select');
-    selectTam.classList.add('select-tamanho');
-    function popularTamanhos(corSelecionadaTam) {
-      selectTam.innerHTML = '';
-      if (estoqueObj[corSelecionadaTam]) {
-        Object.keys(estoqueObj[corSelecionadaTam]).forEach(tam => {
-          const option = document.createElement('option');
-          option.value = tam;
-          option.textContent = tam;
-          selectTam.appendChild(option);
+      cores.forEach(cor => {
+        cor.addEventListener('click', () => {
+          cores.forEach(c => c.classList.remove('selecionado'));
+          cor.classList.add('selecionado');
+          corSelecionada = cor.dataset.cor;
         });
-      }
-    }
-    popularTamanhos(cor);
-    selectTam.value = tamanho;
-    tdTam.appendChild(selectTam);
-    tr.appendChild(tdTam);
-
-    // Quantidade (input)
-    const tdQtd = document.createElement('td');
-    const inputQtd = document.createElement('input');
-    inputQtd.type = 'number';
-    inputQtd.min = 1;
-    inputQtd.value = quantidade;
-    inputQtd.classList.add('input-quantidade');
-    tdQtd.appendChild(inputQtd);
-    tr.appendChild(tdQtd);
-
-    // Preço unitário
-    const tdPreco = document.createElement('td');
-    tdPreco.textContent = 'R$ ' + preco.toFixed(2);
-    tr.appendChild(tdPreco);
-
-    // Total
-    const tdTotal = document.createElement('td');
-    tdTotal.classList.add('total');
-    tdTotal.textContent = 'R$ ' + (preco * quantidade).toFixed(2);
-    tr.appendChild(tdTotal);
-
-    // Remover botão
-    const tdRemover = document.createElement('td');
-    const btnRemover = document.createElement('button');
-    btnRemover.classList.add('btn-remover');
-    btnRemover.textContent = 'X';
-    btnRemover.addEventListener('click', () => {
-      tr.remove();
-      if (listaCorpo.children.length === 0) listaCompra.style.display = 'none';
-    });
-    tdRemover.appendChild(btnRemover);
-    tr.appendChild(tdRemover);
-
-    // Validação de quantidade para o estoque disponível
-    function validarQtd() {
-      let qtd = parseInt(inputQtd.value);
-      if (isNaN(qtd) || qtd < 1) qtd = 1;
-
-      const corSel = selectCor.value;
-      const tamSel = selectTam.value;
-      const estoqueMax = estoqueObj[corSel]?.[tamSel] || 0;
-
-      // Soma quantidades dos outros itens iguais (mesma cor e tamanho)
-      let somaOutros = 0;
-      listaCorpo.querySelectorAll('tr').forEach(linha => {
-        if (linha !== tr) {
-          const corLinha = linha.querySelector('.select-cor').value;
-          const tamLinha = linha.querySelector('.select-tamanho').value;
-          if (corLinha === corSel && tamLinha === tamSel) {
-            somaOutros += parseInt(linha.querySelector('.input-quantidade').value);
-          }
-        }
       });
 
-      if (qtd + somaOutros > estoqueMax) {
-        alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax - somaOutros}`);
-        qtd = estoqueMax - somaOutros;
-        if (qtd < 1) qtd = 1;
-      }
-      inputQtd.value = qtd;
-      atualizarTotal(tr);
-    }
+      tamanhos.forEach(tam => {
+        tam.addEventListener('click', () => {
+          tamanhos.forEach(t => t.classList.remove('selecionado'));
+          tam.classList.add('selecionado');
+          tamanhoSelecionado = tam.dataset.tam;
+        });
+      });
 
-    // Atualiza tamanhos disponíveis ao mudar cor na lista
-    selectCor.addEventListener('change', () => {
-      const corAtual = selectCor.value;
-      popularTamanhos(corAtual);
+      btnAdicionar.addEventListener('click', () => {
+        const codigo = produto.dataset.codigo;
+        const nome = produto.dataset.nome;
+        const qtd = parseInt(inputQtd.value);
 
-      // Se tamanho selecionado não existir, seta o primeiro disponível
-      if (!estoqueObj[corAtual][selectTam.value]) {
-        selectTam.selectedIndex = 0;
-      }
-      validarQtd();
+        if (!corSelecionada || !tamanhoSelecionado || !qtd || qtd < 1) {
+          alert("Selecione cor, tamanho e quantidade válida.");
+          return;
+        }
+
+        const tamEl = [...tamanhos].find(t => t.dataset.tam === tamanhoSelecionado);
+        const estoque = parseInt(tamEl.dataset.disponivel);
+
+        // Verifica se já tem esse item com mesma cor/tam na lista
+        const existente = lista.find(item =>
+          item.codigo === codigo && item.cor === corSelecionada && item.tamanho === tamanhoSelecionado
+        );
+
+        const totalAtual = existente ? existente.qtd + qtd : qtd;
+        if (totalAtual > estoque) {
+          alert(`Quantidade excede o disponível (${estoque} unidades).`);
+          return;
+        }
+
+        if (existente) {
+          existente.qtd += qtd;
+        } else {
+          lista.push({ codigo, nome, cor: corSelecionada, tamanho: tamanhoSelecionado, qtd });
+        }
+
+        atualizarTabela();
+      });
     });
 
-    selectTam.addEventListener('change', () => {
-      validarQtd();
-    });
+    function atualizarTabela() {
+      const tbody = document.querySelector('#tabela-lista tbody');
+      tbody.innerHTML = '';
+      let total = 0;
 
-    inputQtd.addEventListener('input', validarQtd);
+      lista.forEach((item, index) => {
+        total += item.qtd;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.codigo}</td>
+          <td>${item.nome}</td>
+          <td>${item.cor}</td>
+          <td>${item.tamanho}</td>
+          <td>${item.qtd}</td>
+          <td><button onclick="removerItem(${index})">Remover</button></td>
+        `;
+        tbody.appendChild(row);
+      });
 
-    listaCorpo.appendChild(tr);
-    listaCompra.style.display = 'block';
-  }
-
-  // Verifica se item já existe na lista pela combinação código+cor+tamanho
-  function itemExiste(codigo, cor, tamanho) {
-    const linhas = listaCorpo.querySelectorAll('tr');
-    for (const tr of linhas) {
-      if (
-        tr.dataset.codigo === codigo &&
-        tr.querySelector('.select-cor').value === cor &&
-        tr.querySelector('.select-tamanho').value === tamanho
-      ) {
-        return tr;
-      }
-    }
-    return null;
-  }
-
-  document.getElementById('btnAdicionar').addEventListener('click', () => {
-    msgErro.textContent = '';
-
-    if (!corSelecionada) {
-      msgErro.textContent = 'Selecione uma cor.';
-      return;
-    }
-    if (!tamanhoSelecionado) {
-      msgErro.textContent = 'Selecione um tamanho.';
-      return;
-    }
-    let qtd = parseInt(quantidadeInput.value);
-    if (!qtd || qtd < 1) {
-      msgErro.textContent = 'Quantidade inválida.';
-      return;
+      document.getElementById('total-itens').textContent = total;
     }
 
-    const codigo = produtoDiv.dataset.codigo;
-    const nome = produtoDiv.dataset.nome;
-    const preco = parseFloat(produtoDiv.dataset.preco);
-
-    const estoqueMax = estoqueObj[corSelecionada]?.[tamanhoSelecionado] || 0;
-
-    // Soma as quantidades atuais na lista só para essa cor+tamanho
-    let somaNaLista = 0;
-    listaCorpo.querySelectorAll('tr').forEach(linha => {
-      const corLinha = linha.querySelector('.select-cor').value;
-      const tamLinha = linha.querySelector('.select-tamanho').value;
-      if (corLinha === corSelecionada && tamLinha === tamanhoSelecionado) {
-        somaNaLista += parseInt(linha.querySelector('.input-quantidade').value);
-      }
-    });
-
-    if (qtd + somaNaLista > estoqueMax) {
-      alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax - somaNaLista}`);
-      return;
+    function removerItem(index) {
+      lista.splice(index, 1);
+      atualizarTabela();
     }
 
-    // Verificar se já existe item igual (mesmo código, cor e tamanho)
-    const trExistente = itemExiste(codigo, corSelecionada, tamanhoSelecionado);
-    if (trExistente) {
-      const inputQtd = trExistente.querySelector('.input-quantidade');
-      let qtdAtual = parseInt(inputQtd.value);
-      let novaQtd = qtdAtual + qtd;
-
-      if (novaQtd > estoqueMax) {
-        alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax}`);
+    function enviarWhatsApp() {
+      if (lista.length === 0) {
+        alert("Lista está vazia!");
         return;
       }
-      inputQtd.value = novaQtd;
-      atualizarTotal(trExistente);
-    } else {
-      adicionarLinhaLista(codigo, nome, corSelecionada, tamanhoSelecionado, qtd, preco);
-    }
 
-    // Reset seleção e quantidade
-    limparSelecaoCor();
-    limparTamanhos();
-    corSelecionada = null;
-    tamanhoSelecionado = null;
-    quantidadeInput.value = 1;
-  });
-</script>
+      let mensagem = "Pedido:\n";
+      lista.forEach(item => {
+        mensagem += `• ${item.nome} (${item.codigo}) - Cor: ${item.cor}, Tamanho: ${item.tamanho}, Qtd: ${item.qtd}\n`;
+      });
+
+      const total = lista.reduce((s, i) => s + i.qtd, 0);
+      mensagem += `\nTotal de itens: ${total}`;
+      const fone = "5511999999999"; // Substituir pelo número desejado
+      const url = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, '_blank');
+    }
+  </script>
 
 </body>
 </html>

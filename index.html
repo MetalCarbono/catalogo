@@ -240,7 +240,6 @@
     totalTd.textContent = 'R$ ' + (preco * qtd).toFixed(2);
   }
 
-  // Checa se item existe na lista pela combinação código+cor+tamanho
   function itemExiste(codigo, cor, tamanho) {
     const linhas = listaCorpo.querySelectorAll('tr');
     for (const tr of linhas) {
@@ -255,7 +254,6 @@
     return null;
   }
 
-  // Adiciona linha nova na tabela
   function adicionarLinhaLista(codigo, nome, cor, tamanho, quantidade, preco) {
     const tr = document.createElement('tr');
     tr.dataset.codigo = codigo;
@@ -338,17 +336,16 @@
     tdRemover.appendChild(btnRemover);
     tr.appendChild(tdRemover);
 
-    // Valida quantidade pelo estoque
+    // Validação de quantidade para o estoque disponível
     function validarQtd() {
       let qtd = parseInt(inputQtd.value);
       if (isNaN(qtd) || qtd < 1) qtd = 1;
 
-      const cod = tr.dataset.codigo;
       const corSel = selectCor.value;
       const tamSel = selectTam.value;
       const estoqueMax = estoqueObj[corSel]?.[tamSel] || 0;
 
-      // Soma outras quantidades iguais na lista
+      // Soma quantidades dos outros itens iguais (mesma cor e tamanho)
       let somaOutros = 0;
       listaCorpo.querySelectorAll('tr').forEach(linha => {
         if (linha !== tr) {
@@ -369,8 +366,6 @@
       atualizarTotal(tr);
     }
 
-    inputQtd.addEventListener('input', validarQtd);
-
     // Atualiza tamanhos disponíveis ao mudar cor na lista
     selectCor.addEventListener('change', () => {
       const corAtual = selectCor.value;
@@ -383,16 +378,17 @@
       validarQtd();
     });
 
-    // Valida quantidade ao mudar tamanho
     selectTam.addEventListener('change', () => {
       validarQtd();
     });
+
+    inputQtd.addEventListener('input', validarQtd);
 
     listaCorpo.appendChild(tr);
     listaCompra.style.display = 'block';
   }
 
-  // Verifica se item já existe na lista
+  // Verifica se item já existe na lista pela combinação código+cor+tamanho
   function itemExiste(codigo, cor, tamanho) {
     const linhas = listaCorpo.querySelectorAll('tr');
     for (const tr of linhas) {
@@ -428,31 +424,33 @@
     const nome = produtoDiv.dataset.nome;
     const preco = parseFloat(produtoDiv.dataset.preco);
 
+    const estoqueMax = estoqueObj[corSelecionada]?.[tamanhoSelecionado] || 0;
+
+    // Soma as quantidades atuais na lista só para essa cor+tamanho
+    let somaNaLista = 0;
+    listaCorpo.querySelectorAll('tr').forEach(linha => {
+      const corLinha = linha.querySelector('.select-cor').value;
+      const tamLinha = linha.querySelector('.select-tamanho').value;
+      if (corLinha === corSelecionada && tamLinha === tamanhoSelecionado) {
+        somaNaLista += parseInt(linha.querySelector('.input-quantidade').value);
+      }
+    });
+
+    if (qtd + somaNaLista > estoqueMax) {
+      alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax - somaNaLista}`);
+      return;
+    }
+
     // Verificar se já existe item igual (mesmo código, cor e tamanho)
     const trExistente = itemExiste(codigo, corSelecionada, tamanhoSelecionado);
     if (trExistente) {
-      // Atualiza quantidade, respeitando estoque
       const inputQtd = trExistente.querySelector('.input-quantidade');
       let qtdAtual = parseInt(inputQtd.value);
-      let estoqueMax = estoqueObj[corSelecionada][tamanhoSelecionado];
       let novaQtd = qtdAtual + qtd;
 
-      // Soma outras quantidades
-      let somaOutros = 0;
-      listaCorpo.querySelectorAll('tr').forEach(linha => {
-        if (linha !== trExistente) {
-          const corLinha = linha.querySelector('.select-cor').value;
-          const tamLinha = linha.querySelector('.select-tamanho').value;
-          if (corLinha === corSelecionada && tamLinha === tamanhoSelecionado) {
-            somaOutros += parseInt(linha.querySelector('.input-quantidade').value);
-          }
-        }
-      });
-
-      if (novaQtd + somaOutros > estoqueMax) {
-        alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax - somaOutros}`);
-        novaQtd = estoqueMax - somaOutros;
-        if (novaQtd < 1) novaQtd = 1;
+      if (novaQtd > estoqueMax) {
+        alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax}`);
+        return;
       }
       inputQtd.value = novaQtd;
       atualizarTotal(trExistente);

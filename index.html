@@ -11,9 +11,21 @@
     .cores { display: flex; gap: 10px; margin: 10px 0; }
     .cor {
       width: 30px; height: 30px; border: 2px solid #ccc; border-radius: 4px;
-      cursor: pointer; text-indent: -9999px;
+      cursor: pointer; text-indent: -9999px; position: relative;
     }
     .cor.selecionado { border: 2px solid black; }
+    .cor.indisponivel::after {
+      content: '✖';
+      color: white;
+      background: rgba(0,0,0,0.6);
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      font-size: 20px;
+    }
     .cor.vermelho { background: red; }
     .cor.azul { background: blue; }
     .cor.verde { background: green; }
@@ -24,6 +36,12 @@
       border: 1px solid #ccc; border-radius: 4px; padding: 5px 10px; cursor: pointer;
     }
     .tam.selecionado { background: #ccc; }
+    .tam.indisponivel {
+      background: #f0f0f0; color: #999; cursor: not-allowed;
+    }
+    .tam.indisponivel input {
+      display: none;
+    }
     .quantidade { width: 50px; }
 
     .btn { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -92,7 +110,14 @@
     let qtdSelecionada = 1;
 
     produto.querySelectorAll('.cor').forEach(corEl => {
+      const cor = corEl.dataset.cor;
+      const totalDisponivel = Object.values(estoque[cor]).reduce((a, b) => a + b, 0);
+      if (totalDisponivel === 0) {
+        corEl.classList.add('indisponivel');
+        corEl.style.pointerEvents = 'none';
+      }
       corEl.addEventListener('click', () => {
+        if (corEl.classList.contains('indisponivel')) return;
         produto.querySelectorAll('.cor').forEach(c => c.classList.remove('selecionado'));
         corEl.classList.add('selecionado');
         corSelecionada = corEl.dataset.cor;
@@ -115,11 +140,12 @@
       if (!estoque[corSelecionada]) return;
 
       Object.entries(estoque[corSelecionada]).forEach(([tam, disp]) => {
+        const tamEl = document.createElement('div');
+        tamEl.className = 'tam';
+        tamEl.dataset.tam = tam;
+        tamEl.dataset.disp = disp;
+
         if (disp > 0) {
-          const tamEl = document.createElement('div');
-          tamEl.className = 'tam';
-          tamEl.dataset.tam = tam;
-          tamEl.dataset.disp = disp;
           tamEl.innerHTML = `${tam} <input class="quantidade" type="number" min="1" max="${disp}" value="1">`;
           tamEl.addEventListener('click', () => {
             tamanhosDiv.querySelectorAll('.tam').forEach(t => t.classList.remove('selecionado'));
@@ -127,8 +153,11 @@
             tamanhoSelecionado = tam;
             qtdSelecionada = parseInt(tamEl.querySelector('input').value);
           });
-          tamanhosDiv.appendChild(tamEl);
+        } else {
+          tamEl.classList.add('indisponivel');
+          tamEl.textContent = `${tam} ✖`;
         }
+        tamanhosDiv.appendChild(tamEl);
       });
     }
 

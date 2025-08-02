@@ -2,9 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Catálogo Online</title>
+  <title>Catálogo com Controle de Estoque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,19 +52,34 @@
       padding: 15px;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      max-width: 600px;
+      max-width: 800px;
       margin: 20px auto;
     }
-    #listaCompra textarea {
+    table {
       width: 100%;
-      height: 150px;
-      font-family: monospace;
-      font-size: 14px;
-      margin-bottom: 10px;
-      padding: 10px;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    .btn-remover {
+      background: #dc3545;
+      border: none;
+      padding: 5px 10px;
+      color: white;
       border-radius: 4px;
-      border: 1px solid #ccc;
-      resize: vertical;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .btn-remover:hover {
+      background: #a71d2a;
     }
     #graficos {
       max-width: 700px;
@@ -89,9 +103,10 @@
   <div id="catalogo">
 
     <!-- Produto 1 -->
-    <div class="produto" data-produto-id="1" data-nome="Camiseta Básica">
-      <h2>Camiseta Básica</h2>
+    <div class="produto" data-produto-id="1" data-codigo="CAM001" data-nome="Camiseta Básica">
+      <h2>Código: CAM001 - Camiseta Básica</h2>
       <p>Preço unitário: R$ 50,00</p>
+      <p>Estoque disponível: <span class="estoque">10</span></p>
       <label>
         Cor:
         <select class="cor">
@@ -113,14 +128,16 @@
       </label>
       <label>
         Quantidade:
-        <input type="number" class="quantidade" min="0" value="0" />
+        <input type="number" class="quantidade" min="1" value="1" />
       </label>
+      <button class="btn-adicionar">Adicionar à lista</button>
     </div>
 
     <!-- Produto 2 -->
-    <div class="produto" data-produto-id="2" data-nome="Calça Jeans">
-      <h2>Calça Jeans</h2>
+    <div class="produto" data-produto-id="2" data-codigo="CAL002" data-nome="Calça Jeans">
+      <h2>Código: CAL002 - Calça Jeans</h2>
       <p>Preço unitário: R$ 120,00</p>
+      <p>Estoque disponível: <span class="estoque">5</span></p>
       <label>
         Cor:
         <select class="cor">
@@ -142,22 +159,36 @@
       </label>
       <label>
         Quantidade:
-        <input type="number" class="quantidade" min="0" value="0" />
+        <input type="number" class="quantidade" min="1" value="1" />
       </label>
+      <button class="btn-adicionar">Adicionar à lista</button>
     </div>
 
   </div>
 
-  <button id="gerarListaBtn">Gerar Lista de Compra</button>
-
   <div id="listaCompra" style="display:none;">
-    <h3>Lista de Compra (edite antes de enviar)</h3>
-    <textarea id="listaTextarea"></textarea>
-    <br/>
-    <button id="enviarWhatsappBtn">Enviar por WhatsApp</button>
+    <h3>Lista de Compra (edite cores, tamanhos, quantidades ou remova itens)</h3>
+    <table id="tabelaLista">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Produto</th>
+          <th>Cor</th>
+          <th>Tamanho</th>
+          <th>Quantidade</th>
+          <th>Preço Unit.</th>
+          <th>Total</th>
+          <th>Remover</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- linhas vão aqui -->
+      </tbody>
+    </table>
+    <button id="enviarWhatsappBtn" style="margin-top: 15px;">Enviar por WhatsApp</button>
   </div>
 
-  <div id="graficos">
+  <div id="graficos" style="display:none;">
     <canvas id="graficoCores" width="300" height="300"></canvas>
     <canvas id="graficoTamanhos" width="300" height="300"></canvas>
   </div>
@@ -166,158 +197,110 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
+    // Produtos com estoque por produto (quantidade total, simplificado)
     const produtos = [
       {
         id: 1,
+        codigo: 'CAM001',
         nome: 'Camiseta Básica',
         preco: 50.00,
-        opcoesCor: ['Preto', 'Branco', 'Azul'],
-        opcoesTamanho: ['P', 'M', 'G', 'GG'],
+        estoque: 10,
+        cores: ['Preto', 'Branco', 'Azul'],
+        tamanhos: ['P', 'M', 'G', 'GG'],
       },
       {
         id: 2,
+        codigo: 'CAL002',
         nome: 'Calça Jeans',
         preco: 120.00,
-        opcoesCor: ['Azul Claro', 'Azul Escuro', 'Preto'],
-        opcoesTamanho: ['36', '38', '40', '42'],
+        estoque: 5,
+        cores: ['Azul Claro', 'Azul Escuro', 'Preto'],
+        tamanhos: ['36', '38', '40', '42'],
       }
     ];
 
-    const gerarListaBtn = document.getElementById('gerarListaBtn');
     const listaCompraDiv = document.getElementById('listaCompra');
-    const listaTextarea = document.getElementById('listaTextarea');
+    const tabelaLista = document.getElementById('tabelaLista').querySelector('tbody');
     const enviarWhatsappBtn = document.getElementById('enviarWhatsappBtn');
+    const graficosDiv = document.getElementById('graficos');
 
-    gerarListaBtn.addEventListener('click', () => {
-      const linhas = [];
-      const corCount = {};
-      const tamanhoCount = {};
-
-      const produtosDivs = document.querySelectorAll('.produto');
-      produtosDivs.forEach(div => {
-        const nome = div.dataset.nome;
-        const preco = produtos.find(p => p.nome === nome).preco;
-        const cor = div.querySelector('.cor').value;
-        const tamanho = div.querySelector('.tamanho').value;
-        const quantidade = parseInt(div.querySelector('.quantidade').value) || 0;
-
-        if (quantidade > 0) {
-          // Validação mínima: cor e tamanho selecionados
-          if (!cor || !tamanho) {
-            alert(`Para o produto "${nome}" selecione cor e tamanho!`);
-            return;
-          }
-
-          linhas.push(`- ${nome} - Cor: ${cor}, Tamanho: ${tamanho}, Quantidade: ${quantidade}, Total: R$ ${(quantidade * preco).toFixed(2)}`);
-
-          // Contabilizar para gráfico
-          corCount[cor] = (corCount[cor] || 0) + quantidade;
-          tamanhoCount[tamanho] = (tamanhoCount[tamanho] || 0) + quantidade;
+    // Atualizar exibição do estoque na página
+    function atualizarEstoqueNaPagina() {
+      produtos.forEach(p => {
+        const produtoDiv = [...document.querySelectorAll('.produto')].find(div => div.dataset.codigo === p.codigo);
+        if (produtoDiv) {
+          produtoDiv.querySelector('.estoque').textContent = p.estoque;
         }
       });
+    }
+    atualizarEstoqueNaPagina();
 
-      if (linhas.length === 0) {
-        alert('Nenhum produto selecionado.');
-        return;
+    // Adicionar evento aos botões "Adicionar à lista"
+    document.querySelectorAll('.btn-adicionar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const produtoDiv = btn.closest('.produto');
+        const codigo = produtoDiv.dataset.codigo;
+        const nome = produtoDiv.dataset.nome;
+        const produto = produtos.find(p => p.codigo === codigo);
+
+        const cor = produtoDiv.querySelector('.cor').value;
+        const tamanho = produtoDiv.querySelector('.tamanho').value;
+        let quantidade = parseInt(produtoDiv.querySelector('.quantidade').value);
+
+        if (!cor) {
+          alert('Selecione a cor.');
+          return;
+        }
+        if (!tamanho) {
+          alert('Selecione o tamanho.');
+          return;
+        }
+        if (!quantidade || quantidade < 1) {
+          alert('Quantidade deve ser maior que zero.');
+          return;
+        }
+
+        // Verifica estoque disponível para essa quantidade + já adicionada na lista
+        const qtdNaLista = obterQuantidadeNaLista(codigo, cor, tamanho);
+        if (quantidade + qtdNaLista > produto.estoque) {
+          alert(`Quantidade indisponível no estoque. Estoque disponível: ${produto.estoque - qtdNaLista}`);
+          return;
+        }
+
+        adicionarItemNaLista({codigo, nome, cor, tamanho, quantidade, preco: produto.preco});
+        listaCompraDiv.style.display = 'block';
+        graficosDiv.style.display = 'flex';
+        atualizarGraficos();
+      });
+    });
+
+    // Função para obter quantidade já adicionada na lista para o mesmo código + cor + tamanho
+    function obterQuantidadeNaLista(codigo, cor, tamanho) {
+      let soma = 0;
+      for (const tr of tabelaLista.rows) {
+        const codigoTd = tr.querySelector('.td-codigo').textContent;
+        const corSelect = tr.querySelector('.select-cor').value;
+        const tamanhoSelect = tr.querySelector('.select-tamanho').value;
+        if (codigoTd === codigo && corSelect === cor && tamanhoSelect === tamanho) {
+          soma += parseInt(tr.querySelector('.input-quantidade').value);
+        }
       }
-
-      // Mostrar lista para edição
-      listaTextarea.value = linhas.join('\n');
-      listaCompraDiv.style.display = 'block';
-
-      // Atualizar gráficos
-      atualizarGraficos(corCount, tamanhoCount);
-    });
-
-    enviarWhatsappBtn.addEventListener('click', () => {
-      const texto = encodeURIComponent(listaTextarea.value);
-      const telefone = ''; // Pode colocar o número da sua loja (ex: 5511999999999) para pré-definir o destinatário
-      const urlWhatsapp = `https://wa.me/${telefone}?text=${texto}`;
-      window.open(urlWhatsapp, '_blank');
-    });
-
-    let chartCores, chartTamanhos;
-
-    function atualizarGraficos(corCount, tamanhoCount) {
-      // Dados cores
-      const cores = Object.keys(corCount);
-      const qtdeCores = Object.values(corCount);
-
-      // Dados tamanhos
-      const tamanhos = Object.keys(tamanhoCount);
-      const qtdeTamanhos = Object.values(tamanhoCount);
-
-      // Se já existir gráficos, destruir para criar novos
-      if (chartCores) chartCores.destroy();
-      if (chartTamanhos) chartTamanhos.destroy();
-
-      const ctxCores = document.getElementById('graficoCores').getContext('2d');
-      chartCores = new Chart(ctxCores, {
-        type: 'pie',
-        data: {
-          labels: cores,
-          datasets: [{
-            label: 'Quantidade por Cor',
-            data: qtdeCores,
-            backgroundColor: cores.map(cor => gerarCorAleatoria()),
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-            },
-            title: {
-              display: true,
-              text: 'Quantidade por Cor'
-            }
-          }
-        }
-      });
-
-      const ctxTamanhos = document.getElementById('graficoTamanhos').getContext('2d');
-      chartTamanhos = new Chart(ctxTamanhos, {
-        type: 'bar',
-        data: {
-          labels: tamanhos,
-          datasets: [{
-            label: 'Quantidade por Tamanho',
-            data: qtdeTamanhos,
-            backgroundColor: tamanhos.map(() => 'rgba(54, 162, 235, 0.7)'),
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              stepSize: 1
-            }
-          },
-          plugins: {
-            legend: {
-              display: false,
-            },
-            title: {
-              display: true,
-              text: 'Quantidade por Tamanho'
-            }
-          }
-        }
-      });
+      return soma;
     }
 
-    // Função para gerar cor aleatória em rgba para gráficos
-    function gerarCorAleatoria() {
-      const r = Math.floor(Math.random() * 180) + 50;
-      const g = Math.floor(Math.random() * 180) + 50;
-      const b = Math.floor(Math.random() * 180) + 50;
-      return `rgba(${r},${g},${b},0.7)`;
-    }
-  </script>
-</body>
-</html>
+    // Função para adicionar item na tabela
+    function adicionarItemNaLista(item) {
+      // Verifica se já existe um item com mesmo código, cor e tamanho — se sim, soma quantidade
+      const linhas = Array.from(tabelaLista.querySelectorAll('tr'));
+      for (const linha of linhas) {
+        const codigoTd = linha.querySelector('.td-codigo').textContent;
+        const corSelect = linha.querySelector('.select-cor');
+        const tamanhoSelect = linha.querySelector('.select-tamanho');
+        if (codigoTd === item.codigo && corSelect.value === item.cor && tamanhoSelect.value === item.tamanho) {
+          // Atualiza quantidade (somando e respeitando estoque)
+          let qtdAtual = parseInt(linha.querySelector('.input-quantidade').value);
+          let novaQtd = qtdAtual + item.quantidade;
+
+          const produto = produtos.find(p => p.codigo === item.codigo);
+          if (novaQtd > produto.estoque) {
+            alert(`Quantidade máxima no estoque para este item é ${produto.estoque}.`);

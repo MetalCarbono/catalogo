@@ -361,4 +361,113 @@
       });
 
       if (qtd + somaOutros > estoqueMax) {
-        alert(`Quantidade máxima disponível no estoque para e
+        alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax - somaOutros}`);
+        qtd = estoqueMax - somaOutros;
+        if (qtd < 1) qtd = 1;
+      }
+      inputQtd.value = qtd;
+      atualizarTotal(tr);
+    }
+
+    inputQtd.addEventListener('input', validarQtd);
+
+    // Atualiza tamanhos disponíveis ao mudar cor na lista
+    selectCor.addEventListener('change', () => {
+      const corAtual = selectCor.value;
+      popularTamanhos(corAtual);
+
+      // Se tamanho selecionado não existir, seta o primeiro disponível
+      if (!estoqueObj[corAtual][selectTam.value]) {
+        selectTam.selectedIndex = 0;
+      }
+      validarQtd();
+    });
+
+    // Valida quantidade ao mudar tamanho
+    selectTam.addEventListener('change', () => {
+      validarQtd();
+    });
+
+    listaCorpo.appendChild(tr);
+    listaCompra.style.display = 'block';
+  }
+
+  // Verifica se item já existe na lista
+  function itemExiste(codigo, cor, tamanho) {
+    const linhas = listaCorpo.querySelectorAll('tr');
+    for (const tr of linhas) {
+      if (
+        tr.dataset.codigo === codigo &&
+        tr.querySelector('.select-cor').value === cor &&
+        tr.querySelector('.select-tamanho').value === tamanho
+      ) {
+        return tr;
+      }
+    }
+    return null;
+  }
+
+  document.getElementById('btnAdicionar').addEventListener('click', () => {
+    msgErro.textContent = '';
+
+    if (!corSelecionada) {
+      msgErro.textContent = 'Selecione uma cor.';
+      return;
+    }
+    if (!tamanhoSelecionado) {
+      msgErro.textContent = 'Selecione um tamanho.';
+      return;
+    }
+    let qtd = parseInt(quantidadeInput.value);
+    if (!qtd || qtd < 1) {
+      msgErro.textContent = 'Quantidade inválida.';
+      return;
+    }
+
+    const codigo = produtoDiv.dataset.codigo;
+    const nome = produtoDiv.dataset.nome;
+    const preco = parseFloat(produtoDiv.dataset.preco);
+
+    // Verificar se já existe item igual (mesmo código, cor e tamanho)
+    const trExistente = itemExiste(codigo, corSelecionada, tamanhoSelecionado);
+    if (trExistente) {
+      // Atualiza quantidade, respeitando estoque
+      const inputQtd = trExistente.querySelector('.input-quantidade');
+      let qtdAtual = parseInt(inputQtd.value);
+      let estoqueMax = estoqueObj[corSelecionada][tamanhoSelecionado];
+      let novaQtd = qtdAtual + qtd;
+
+      // Soma outras quantidades
+      let somaOutros = 0;
+      listaCorpo.querySelectorAll('tr').forEach(linha => {
+        if (linha !== trExistente) {
+          const corLinha = linha.querySelector('.select-cor').value;
+          const tamLinha = linha.querySelector('.select-tamanho').value;
+          if (corLinha === corSelecionada && tamLinha === tamanhoSelecionado) {
+            somaOutros += parseInt(linha.querySelector('.input-quantidade').value);
+          }
+        }
+      });
+
+      if (novaQtd + somaOutros > estoqueMax) {
+        alert(`Quantidade máxima disponível no estoque para essa combinação: ${estoqueMax - somaOutros}`);
+        novaQtd = estoqueMax - somaOutros;
+        if (novaQtd < 1) novaQtd = 1;
+      }
+      inputQtd.value = novaQtd;
+      atualizarTotal(trExistente);
+    } else {
+      adicionarLinhaLista(codigo, nome, corSelecionada, tamanhoSelecionado, qtd, preco);
+    }
+
+    // Reset seleção e quantidade
+    limparSelecaoCor();
+    limparTamanhos();
+    corSelecionada = null;
+    tamanhoSelecionado = null;
+    quantidadeInput.value = 1;
+  });
+</script>
+
+</body>
+</html>

@@ -6,23 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    h2 { margin-top: 40px; }
-    .produto { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; background: white; }
-    .cores, .tamanhos { display: flex; gap: 5px; margin: 10px 0; }
-    .cor, .tam {
-      width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-      border: 1px solid #ccc; border-radius: 4px; cursor: pointer;
+    h1, h2 { margin-bottom: 20px; }
+    .produto { border: 1px solid #ccc; border-radius: 8px; background: #fff; padding: 15px; margin-bottom: 20px; }
+    .cores { display: flex; gap: 10px; margin: 10px 0; }
+    .cor {
+      width: 30px; height: 30px; border: 2px solid #ccc; border-radius: 4px;
+      cursor: pointer; text-indent: -9999px;
     }
-    .cor.selecionado, .tam.selecionado { border: 2px solid black; }
-    .cor { text-indent: -9999px; }
+    .cor.selecionado { border: 2px solid black; }
     .cor.vermelho { background: red; }
     .cor.azul { background: blue; }
     .cor.verde { background: green; }
-    .tam { background: #eee; }
-    .btn { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+    .tamanhos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .tam {
+      display: flex; align-items: center; gap: 5px; background: #eee;
+      border: 1px solid #ccc; border-radius: 4px; padding: 5px 10px; cursor: pointer;
+    }
+    .tam.selecionado { background: #ccc; }
+    .quantidade { width: 50px; }
+
+    .btn { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
     .btn:hover { background: #0056b3; }
-    .lista { margin-top: 30px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     .resumo { margin-top: 15px; font-weight: bold; }
   </style>
@@ -31,32 +38,24 @@
 
   <h1>Catálogo de Produtos</h1>
 
-  <div class="produto" data-codigo="001" data-nome="Camiseta Básica" data-descricao="Camiseta 100% algodão">
+  <div class="produto" data-codigo="001" data-nome="Camiseta Básica">
     <h3>Camiseta Básica (001)</h3>
-    <p>Camiseta 100% algodão</p>
-    <div><strong>Cores:</strong></div>
+    <div><strong>Cor:</strong></div>
     <div class="cores">
       <div class="cor vermelho" data-cor="Vermelho"></div>
       <div class="cor azul" data-cor="Azul"></div>
       <div class="cor verde" data-cor="Verde"></div>
     </div>
-    <div><strong>Tamanhos:</strong></div>
-    <div class="tamanhos">
-      <div class="tam" data-tam="P" data-disponivel="3">P</div>
-      <div class="tam" data-tam="M" data-disponivel="2">M</div>
-      <div class="tam" data-tam="G" data-disponivel="4">G</div>
-    </div>
-    <div>
-      <label>Quantidade: <input type="number" min="1" value="1" class="quantidade"></label>
-      <button class="btn adicionar">Adicionar à Lista</button>
-    </div>
-  </div>
 
-  <!-- Mais produtos podem ser duplicados com mesmo formato acima -->
+    <div><strong>Tamanhos Disponíveis:</strong></div>
+    <div class="tamanhos"></div>
+
+    <button class="btn adicionar">Adicionar à Lista</button>
+  </div>
 
   <div class="lista">
     <h2>Lista de Compras</h2>
-    <table id="tabela-lista">
+    <table>
       <thead>
         <tr>
           <th>Código</th>
@@ -67,80 +66,95 @@
           <th>Remover</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="lista-itens"></tbody>
     </table>
     <div class="resumo">Total de Itens: <span id="total-itens">0</span></div>
     <button class="btn" onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
   </div>
 
   <script>
-    let lista = [];
+    const produto = document.querySelector('.produto');
+    const tamanhosDiv = produto.querySelector('.tamanhos');
+    const listaItens = [];
 
-    document.querySelectorAll('.produto').forEach(produto => {
-      let corSelecionada = null;
-      let tamanhoSelecionado = null;
+    const estoque = {
+      "Vermelho": { "P": 2, "M": 1, "G": 3 },
+      "Azul": { "P": 0, "M": 2, "G": 1 },
+      "Verde": { "P": 1, "M": 1, "G": 2 }
+    };
 
-      const cores = produto.querySelectorAll('.cor');
-      const tamanhos = produto.querySelectorAll('.tam');
-      const btnAdicionar = produto.querySelector('.adicionar');
-      const inputQtd = produto.querySelector('.quantidade');
+    let corSelecionada = null;
+    let tamanhoSelecionado = null;
+    let qtdSelecionada = 1;
 
-      cores.forEach(cor => {
-        cor.addEventListener('click', () => {
-          cores.forEach(c => c.classList.remove('selecionado'));
-          cor.classList.add('selecionado');
-          corSelecionada = cor.dataset.cor;
-        });
-      });
-
-      tamanhos.forEach(tam => {
-        tam.addEventListener('click', () => {
-          tamanhos.forEach(t => t.classList.remove('selecionado'));
-          tam.classList.add('selecionado');
-          tamanhoSelecionado = tam.dataset.tam;
-        });
-      });
-
-      btnAdicionar.addEventListener('click', () => {
-        const codigo = produto.dataset.codigo;
-        const nome = produto.dataset.nome;
-        const qtd = parseInt(inputQtd.value);
-
-        if (!corSelecionada || !tamanhoSelecionado || !qtd || qtd < 1) {
-          alert("Selecione cor, tamanho e quantidade válida.");
-          return;
-        }
-
-        const tamEl = [...tamanhos].find(t => t.dataset.tam === tamanhoSelecionado);
-        const estoque = parseInt(tamEl.dataset.disponivel);
-
-        // Verifica se já tem esse item com mesma cor/tam na lista
-        const existente = lista.find(item =>
-          item.codigo === codigo && item.cor === corSelecionada && item.tamanho === tamanhoSelecionado
-        );
-
-        const totalAtual = existente ? existente.qtd + qtd : qtd;
-        if (totalAtual > estoque) {
-          alert(`Quantidade excede o disponível (${estoque} unidades).`);
-          return;
-        }
-
-        if (existente) {
-          existente.qtd += qtd;
-        } else {
-          lista.push({ codigo, nome, cor: corSelecionada, tamanho: tamanhoSelecionado, qtd });
-        }
-
-        atualizarTabela();
+    produto.querySelectorAll('.cor').forEach(corEl => {
+      corEl.addEventListener('click', () => {
+        produto.querySelectorAll('.cor').forEach(c => c.classList.remove('selecionado'));
+        corEl.classList.add('selecionado');
+        corSelecionada = corEl.dataset.cor;
+        mostrarTamanhos();
       });
     });
 
+    function mostrarTamanhos() {
+      tamanhosDiv.innerHTML = '';
+      tamanhoSelecionado = null;
+      if (!estoque[corSelecionada]) return;
+
+      Object.entries(estoque[corSelecionada]).forEach(([tam, disp]) => {
+        if (disp > 0) {
+          const tamEl = document.createElement('div');
+          tamEl.className = 'tam';
+          tamEl.dataset.tam = tam;
+          tamEl.dataset.disp = disp;
+          tamEl.innerHTML = `${tam} <input class="quantidade" type="number" min="1" max="${disp}" value="1">`;
+          tamEl.addEventListener('click', () => {
+            tamanhosDiv.querySelectorAll('.tam').forEach(t => t.classList.remove('selecionado'));
+            tamEl.classList.add('selecionado');
+            tamanhoSelecionado = tam;
+            qtdSelecionada = parseInt(tamEl.querySelector('input').value);
+          });
+          tamanhosDiv.appendChild(tamEl);
+        }
+      });
+    }
+
+    produto.querySelector('.adicionar').addEventListener('click', () => {
+      if (!corSelecionada || !tamanhoSelecionado || !qtdSelecionada) {
+        alert('Selecione cor, tamanho e quantidade.');
+        return;
+      }
+
+      const disp = estoque[corSelecionada][tamanhoSelecionado];
+      const input = tamanhosDiv.querySelector('.tam.selecionado input');
+      const qtd = parseInt(input.value);
+      if (qtd > disp) {
+        alert(`Quantidade não disponível. Estoque: ${disp}`);
+        return;
+      }
+
+      const codigo = produto.dataset.codigo;
+      const nome = produto.dataset.nome;
+
+      const existente = listaItens.find(i => i.codigo === codigo && i.cor === corSelecionada && i.tamanho === tamanhoSelecionado);
+      if (existente) {
+        if (existente.qtd + qtd > disp) {
+          alert(`Não é possível adicionar mais do que o estoque disponível.`);
+          return;
+        }
+        existente.qtd += qtd;
+      } else {
+        listaItens.push({ codigo, nome, cor: corSelecionada, tamanho: tamanhoSelecionado, qtd });
+      }
+
+      atualizarTabela();
+    });
+
     function atualizarTabela() {
-      const tbody = document.querySelector('#tabela-lista tbody');
+      const tbody = document.getElementById('lista-itens');
       tbody.innerHTML = '';
       let total = 0;
-
-      lista.forEach((item, index) => {
+      listaItens.forEach((item, index) => {
         total += item.qtd;
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -153,30 +167,22 @@
         `;
         tbody.appendChild(row);
       });
-
       document.getElementById('total-itens').textContent = total;
     }
 
     function removerItem(index) {
-      lista.splice(index, 1);
+      listaItens.splice(index, 1);
       atualizarTabela();
     }
 
     function enviarWhatsApp() {
-      if (lista.length === 0) {
-        alert("Lista está vazia!");
-        return;
-      }
-
-      let mensagem = "Pedido:\n";
-      lista.forEach(item => {
-        mensagem += `• ${item.nome} (${item.codigo}) - Cor: ${item.cor}, Tamanho: ${item.tamanho}, Qtd: ${item.qtd}\n`;
+      if (listaItens.length === 0) return alert('A lista está vazia.');
+      let msg = 'Pedido:%0A';
+      listaItens.forEach(item => {
+        msg += `*${item.nome}* (${item.codigo}) - Cor: ${item.cor}, Tam: ${item.tamanho}, Qtd: ${item.qtd}%0A`;
       });
-
-      const total = lista.reduce((s, i) => s + i.qtd, 0);
-      mensagem += `\nTotal de itens: ${total}`;
-      const fone = "5511999999999"; // Substituir pelo número desejado
-      const url = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+      msg += `%0ATotal de itens: ${listaItens.reduce((s, i) => s + i.qtd, 0)}`;
+      const url = `https://wa.me/5511999999999?text=${msg}`;
       window.open(url, '_blank');
     }
   </script>

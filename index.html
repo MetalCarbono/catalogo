@@ -6,29 +6,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-    h1, h2 { margin-bottom: 20px; }
     .produto { border: 1px solid #ccc; border-radius: 8px; background: #fff; padding: 15px; margin-bottom: 20px; }
     .cores { display: flex; gap: 10px; margin: 10px 0; }
     .cor {
       width: 30px; height: 30px; border: 2px solid #ccc; border-radius: 4px;
-      cursor: pointer; text-indent: -9999px; position: relative;
+      cursor: pointer; position: relative;
     }
     .cor.selecionado { border: 2px solid black; }
-    .cor.indisponivel {
-      opacity: 0.4;
-      pointer-events: none;
-    }
     .cor.indisponivel::after {
-      content: '✖';
-      color: white;
-      background: rgba(0,0,0,0.6);
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 4px;
-      font-size: 20px;
+      content: '✖'; color: white; background: rgba(0,0,0,0.6);
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; justify-content: center; align-items: center;
+      border-radius: 4px; font-size: 20px;
     }
     .cor.vermelho { background: red; }
     .cor.azul { background: blue; }
@@ -40,13 +29,9 @@
       border: 1px solid #ccc; border-radius: 4px; padding: 5px 10px; cursor: pointer;
     }
     .tam.selecionado { background: #ccc; }
-    .tam.indisponivel {
-      background: #f0f0f0; color: #999; cursor: not-allowed;
-    }
-    .tam.indisponivel input {
-      display: none;
-    }
-    .quantidade { width: 60px; text-align: center; }
+    .tam.indisponivel { background: #f0f0f0; color: #999; cursor: not-allowed; }
+    .tam.indisponivel input { display: none; }
+    .quantidade { width: 50px; }
 
     .btn { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
     .btn:hover { background: #0056b3; }
@@ -61,7 +46,8 @@
 
   <h1>Catálogo de Produtos</h1>
 
-  <div class="produto" data-codigo="001" data-nome="Camiseta Básica">
+  <!-- Produto 1 -->
+  <div class="produto" data-codigo="001" data-nome="Camiseta Básica" data-estoque='{"Vermelho":{"P":2,"M":1,"G":3},"Azul":{"P":0,"M":2,"G":1},"Verde":{"P":1,"M":1,"G":2}}'>
     <h3>Camiseta Básica (001)</h3>
     <div><strong>Cor:</strong></div>
     <div class="cores">
@@ -69,12 +55,23 @@
       <div class="cor azul" data-cor="Azul"></div>
       <div class="cor verde" data-cor="Verde"></div>
     </div>
-
-    <div class="estoque-info" id="info-estoque"></div>
-
+    <div class="estoque-info"></div>
     <div><strong>Tamanhos Disponíveis:</strong></div>
     <div class="tamanhos"></div>
+    <button class="btn adicionar">Adicionar à Lista</button>
+  </div>
 
+  <!-- Produto 2 (exemplo) -->
+  <div class="produto" data-codigo="002" data-nome="Regata Estampada" data-estoque='{"Vermelho":{"M":1},"Verde":{"G":2}}'>
+    <h3>Regata Estampada (002)</h3>
+    <div><strong>Cor:</strong></div>
+    <div class="cores">
+      <div class="cor vermelho" data-cor="Vermelho"></div>
+      <div class="cor verde" data-cor="Verde"></div>
+    </div>
+    <div class="estoque-info"></div>
+    <div><strong>Tamanhos Disponíveis:</strong></div>
+    <div class="tamanhos"></div>
     <button class="btn adicionar">Adicionar à Lista</button>
   </div>
 
@@ -98,108 +95,97 @@
   </div>
 
   <script>
-    const produto = document.querySelector('.produto');
-    const tamanhosDiv = produto.querySelector('.tamanhos');
-    const infoEstoque = document.getElementById('info-estoque');
     const listaItens = [];
 
-    const estoque = {
-      "Vermelho": { "P": 2, "M": 1, "G": 3 },
-      "Azul": { "P": 0, "M": 2, "G": 1 },
-      "Verde": { "P": 1, "M": 1, "G": 2 }
-    };
-
-    let corSelecionada = null;
-
-    produto.querySelectorAll('.cor').forEach(corEl => {
-      const cor = corEl.dataset.cor;
-      const totalDisponivel = Object.values(estoque[cor]).reduce((a, b) => a + b, 0);
-      if (totalDisponivel === 0) {
-        corEl.classList.add('indisponivel');
-      }
-      corEl.addEventListener('click', () => {
-        if (corEl.classList.contains('indisponivel')) return;
-        produto.querySelectorAll('.cor').forEach(c => c.classList.remove('selecionado'));
-        corEl.classList.add('selecionado');
-        corSelecionada = corEl.dataset.cor;
-        mostrarEstoque();
-        mostrarTamanhos();
-      });
-    });
-
-    function mostrarEstoque() {
-      const disp = estoque[corSelecionada];
-      if (!disp) return;
-      let info = `<strong>Estoque ${corSelecionada}:</strong> `;
-      info += Object.entries(disp).map(([t, q]) => `${t}: ${q}`).join(', ');
-      infoEstoque.innerHTML = info;
-    }
-
-    function mostrarTamanhos() {
-      tamanhosDiv.innerHTML = '';
-      if (!estoque[corSelecionada]) return;
-
-      Object.entries(estoque[corSelecionada]).forEach(([tam, disp]) => {
-        const tamEl = document.createElement('div');
-        tamEl.className = 'tam';
-        tamEl.dataset.tam = tam;
-        tamEl.dataset.disp = disp;
-
-        if (disp > 0) {
-          tamEl.innerHTML = `${tam} <input class="quantidade" type="number" min="1" max="${disp}" value="1">`;
-        } else {
-          tamEl.classList.add('indisponivel');
-          tamEl.textContent = `${tam} ✖`;
-        }
-        tamanhosDiv.appendChild(tamEl);
-      });
-    }
-
-    produto.querySelector('.adicionar').addEventListener('click', () => {
-      if (!corSelecionada) {
-        alert('Selecione uma cor.');
-        return;
-      }
-
+    document.querySelectorAll('.produto').forEach(produto => {
       const codigo = produto.dataset.codigo;
       const nome = produto.dataset.nome;
-      const tamEls = Array.from(tamanhosDiv.querySelectorAll('.tam'));
-      let algumSelecionado = false;
+      const estoque = JSON.parse(produto.dataset.estoque);
+      let corSelecionada = null;
 
-      tamEls.forEach(tamEl => {
-        if (tamEl.classList.contains('indisponivel')) return;
+      const coresDiv = produto.querySelector('.cores');
+      const tamanhosDiv = produto.querySelector('.tamanhos');
+      const infoEstoque = produto.querySelector('.estoque-info');
 
-        const tam = tamEl.dataset.tam;
-        const input = tamEl.querySelector('input');
-        const qtd = parseInt(input?.value);
-        const disp = parseInt(tamEl.dataset.disp);
-
-        if (!isNaN(qtd) && qtd > 0 && qtd <= disp) {
-          algumSelecionado = true;
-          const existente = listaItens.find(i => i.codigo === codigo && i.cor === corSelecionada && i.tamanho === tam);
-
-          if (existente) {
-            if (existente.qtd + qtd > estoque[corSelecionada][tam]) {
-              alert(`Estoque insuficiente para ${tam}. Disponível: ${estoque[corSelecionada][tam]}`);
-            } else {
-              existente.qtd += qtd;
-              estoque[corSelecionada][tam] -= qtd;
-            }
-          } else {
-            listaItens.push({ codigo, nome, cor: corSelecionada, tamanho: tam, qtd });
-            estoque[corSelecionada][tam] -= qtd;
-          }
+      coresDiv.querySelectorAll('.cor').forEach(corEl => {
+        const cor = corEl.dataset.cor;
+        const total = estoque[cor] ? Object.values(estoque[cor]).reduce((a, b) => a + b, 0) : 0;
+        if (total === 0) {
+          corEl.classList.add('indisponivel');
+          corEl.style.pointerEvents = 'none';
         }
+        corEl.addEventListener('click', () => {
+          if (corEl.classList.contains('indisponivel')) return;
+          coresDiv.querySelectorAll('.cor').forEach(c => c.classList.remove('selecionado'));
+          corEl.classList.add('selecionado');
+          corSelecionada = cor;
+          mostrarEstoque();
+          mostrarTamanhos();
+        });
       });
 
-      if (!algumSelecionado) {
-        alert('Informe a quantidade para pelo menos um tamanho.');
-        return;
+      function mostrarEstoque() {
+        const disp = estoque[corSelecionada];
+        if (!disp) return;
+        let info = `<strong>Estoque ${corSelecionada}:</strong> `;
+        info += Object.entries(disp).map(([t, q]) => `${t}: ${q}`).join(', ');
+        infoEstoque.innerHTML = info;
       }
 
-      mostrarEstoque();
-      mostrarTamanhos();
-      atualizarTabela();
+      function mostrarTamanhos() {
+        tamanhosDiv.innerHTML = '';
+        if (!estoque[corSelecionada]) return;
+        Object.entries(estoque[corSelecionada]).forEach(([tam, disp]) => {
+          const tamEl = document.createElement('div');
+          tamEl.className = 'tam';
+          tamEl.dataset.tam = tam;
+          tamEl.dataset.disp = disp;
+          if (disp > 0) {
+            tamEl.innerHTML = `${tam} <input class="quantidade" type="number" min="1" max="${disp}" value="1">`;
+          } else {
+            tamEl.classList.add('indisponivel');
+            tamEl.textContent = `${tam} ✖`;
+          }
+          tamanhosDiv.appendChild(tamEl);
+        });
+      }
+
+      produto.querySelector('.adicionar').addEventListener('click', () => {
+        if (!corSelecionada) return alert('Selecione uma cor.');
+
+        let selecionado = false;
+
+        tamanhosDiv.querySelectorAll('.tam').forEach(tamEl => {
+          if (tamEl.classList.contains('indisponivel')) return;
+          const tam = tamEl.dataset.tam;
+          const input = tamEl.querySelector('input');
+          const qtd = parseInt(input.value);
+          const disp = parseInt(tamEl.dataset.disp);
+
+          if (qtd > 0 && qtd <= disp) {
+            selecionado = true;
+
+            const itemExistente = listaItens.find(i => i.codigo === codigo && i.cor === corSelecionada && i.tamanho === tam);
+            if (itemExistente) {
+              if (itemExistente.qtd + qtd > estoque[corSelecionada][tam]) {
+                alert(`Estoque insuficiente para ${tam}. Disponível: ${estoque[corSelecionada][tam]}`);
+              } else {
+                itemExistente.qtd += qtd;
+                estoque[corSelecionada][tam] -= qtd;
+              }
+            } else {
+              listaItens.push({ codigo, nome, cor: corSelecionada, tamanho: tam, qtd });
+              estoque[corSelecionada][tam] -= qtd;
+            }
+          }
+        });
+
+        if (!selecionado) return alert('Informe uma quantidade válida.');
+
+        mostrarEstoque();
+        mostrarTamanhos();
+        atualizarTabela();
+      });
     });
 
     function atualizarTabela() {
@@ -224,11 +210,12 @@
 
     function removerItem(index) {
       const item = listaItens[index];
+      const produto = document.querySelector(`.produto[data-codigo="${item.codigo}"]`);
+      const estoque = JSON.parse(produto.dataset.estoque);
       estoque[item.cor][item.tamanho] += item.qtd;
+      produto.dataset.estoque = JSON.stringify(estoque);
       listaItens.splice(index, 1);
-      mostrarEstoque();
-      mostrarTamanhos();
-      atualizarTabela();
+      location.reload(); // Recarrega para refletir visualmente
     }
 
     function enviarWhatsApp() {
@@ -238,8 +225,7 @@
         msg += `*${item.nome}* (${item.codigo}) - Cor: ${item.cor}, Tam: ${item.tamanho}, Qtd: ${item.qtd}%0A`;
       });
       msg += `%0ATotal de itens: ${listaItens.reduce((s, i) => s + i.qtd, 0)}`;
-      const url = `https://wa.me/5511999999999?text=${msg}`;
-      window.open(url, '_blank');
+      window.open(`https://wa.me/5511999999999?text=${msg}`, '_blank');
     }
   </script>
 
